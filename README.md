@@ -13,4 +13,15 @@ Its methods are used in the GUI tool, screencast available [here](https://www.dr
 - Get number of occurrences for resolved alternatives of an update, computed by a sample of the same type and same property name.
 
 	`scala TestStatisticsFromDBpedia.main(Array(""))`
-	
+
+- Get the number of fired infobox properties, given a downloaded sample of football players from Wikipedia
+
+	`scala TestInfoboxCountFootballPlayersStats.main(Array(""))`
+
+- Get the number of fired infobox properties, given a downloaded sample of clubs from Wikipedia
+
+	`scala TestInfoboxCountClubsStats.main(Array(""))`
+
+- Get the number of fired infobox properties, given a downloaded sample of cities from Wikipedia
+
+	`scala TestInfoboxCountCitiesStats.main(Array(""))`

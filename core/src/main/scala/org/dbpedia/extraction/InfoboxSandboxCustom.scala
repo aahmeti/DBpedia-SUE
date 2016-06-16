@@ -1546,12 +1546,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     res
   }
 
-  def getQueryResultsFromLocalDBpedia(queryStr: String) = {
-
+  def getQueryResultsFromLocalDBpedia(queryStr: String) =
+  {
     var res: ResultSet = null
     val query = QueryFactory.create(queryStr)
 
-    val qexec: QueryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.ai.wu.ac.at:8890/sparql", query)
+    val qexec: QueryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", query)
 
     try {
       res = qexec.execSelect
@@ -2179,7 +2179,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     }
 
-    object TestStatisticsFromDBpedia {
+    object TestStatistics {
 
       def main(args: Array[String]): Unit = {
 
@@ -2187,28 +2187,34 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val mappingFileSuffix = ".xml"
         val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
-        val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia04.ru"))
+        var updateStr = "./data/updates/dbpedia04.ru"
+        var classType = "<http://dbpedia.org/ontology/SoccerPlayer>"
+        var sampleSize = 100
+
+        if (args.length == 3)
+        {
+          updateStr = args(0)
+
+          if (args(1).equals("SoccerPlayer"))
+            classType = "<http://dbpedia.org/ontology/SoccerPlayer>"
+          else if (args(1).equals("Film"))
+            classType = "<http://dbpedia.org/ontology/Film>"
+          else if (args(1).equals("University"))
+            classType = "<http://dbpedia.org/ontology/University>"
+          else if (args(1).equals("Settlement"))
+            classType = "<http://dbpedia.org/ontology/Settlement>"
+
+          sampleSize = args(2).toInt
+        }
+
+
+        val update = UpdateFactory.create(UtilFunctions.readFile(updateStr))
 
         val updateMod: UpdateModify = update.getOperations.get(0).asInstanceOf[UpdateModify]
         val insertQuads = updateMod.getInsertQuads
 
-//        val resUpdate = test.resolveUpdate(update)
-        println(update)
-
-        //    val classType:String = "<http://dbpedia.org/ontology/Settlement>"
-        //    val classType:String = "<http://dbpedia.org/ontology/SoccerPlayer>"
-        //    val classType:String = "<http://dbpedia.org/ontology/Band>"
-        //    val classType:String = "<http://dbpedia.org/ontology/AdministrativeRegion>"
-        //    val classType:String = "<http://dbpedia.org/ontology/River>"
-        //    val classType:String = "<http://dbpedia.org/ontology/SoccerClub>"
-        //    val classType:String = "<http://dbpedia.org/ontology/University>"
-        //    val classType:String = "<http://dbpedia.org/ontology/BasketballPlayer>"
-        //      val classType:String = "<http://dbpedia.org/ontology/Actor>"
-        //     val classType:String = "<http://dbpedia.org/ontology/Skier>"
-        val classType: String = "<http://dbpedia.org/ontology/Film>"
-
-        val queries = test.getQueryForResourcesWithSamePredicates(update, 100, insertQuads.get(0).getPredicate.toString(), classType)
-        println(queries)
+        val queries = test.getQueryForResourcesWithSamePredicates(update, sampleSize,
+                                          insertQuads.get(0).getPredicate.toString(), classType)
 
         val subjects = new ArrayBuffer[String]()
 
@@ -2232,23 +2238,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // flatten wikiDMLs
         val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
 
-        //    val subj = subjects.toSet
-
         println(test.countInfoboxProperties(subjects, setWikiDML))
-
-        //    println("...")
-        //    println("Now using statistics from dbpedia")
-        //
-        //    val alternatives = new mutable.HashSet[String]()
-        //    val wikiRecommender: WikiTemplateManager = new WikiTemplateManager
-        //
-        //    val infoboxSearch = "Template:" + setWikiDML(0).infobox
-        //    for (wikiDML <- setWikiDML) {
-        //      alternatives += wikiDML.property
-        //    }
-        //
-        //    wikiRecommender.recommendAllAlternative(infoboxSearch, alternatives)
-
 
       }
 

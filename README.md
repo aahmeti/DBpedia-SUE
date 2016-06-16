@@ -10,9 +10,20 @@ Its methods are used in the GUI tool, screencast available [here](https://www.dr
 
 ### Experiments 
 
-- Get number of occurrences for resolved alternatives of an update, computed by a sample of the same type and same property name.
+- Get number of occurrences for resolved alternatives of an update, computed by a sample — retrieving entities of the given type and same property name as in update. 
+	
+	- `param1`: the update
+	- `param2`: type (SoccerPlayer, Settlement, University, Film)
+	- `param3`: size of the sample 
 
-	`scala TestStatisticsFromDBpedia.main(Array(""))`
+	* SoccerPlayer	
+	`scala TestStatistics.main(Array("./data/updates/dbpedia01.ru", "SoccerPlayer", "100"))`
+	*	Settlement
+	`scala TestStatistics.main(Array("./data/updates/dbpedia02.ru", "Settlement", "100"))`
+	* Universities
+	`scala TestStatistics.main(Array("./data/updates/dbpedia03.ru", "University", "100"))`
+	* Film
+	`scala TestStatistics.main(Array("./data/updates/dbpedia04.ru", "Film", "100"))`	
 
 - Get the number of fired infobox properties, given a downloaded sample of football players from Wikipedia
 
@@ -25,3 +36,5 @@ Its methods are used in the GUI tool, screencast available [here](https://www.dr
 - Get the number of fired infobox properties, given a downloaded sample of cities from Wikipedia
 
 	`scala TestInfoboxCountCitiesStats.main(Array(""))`
+	
+	

@@ -10,8 +10,7 @@ prefix dbpedia: <http://dbpedia.org/>
 prefix skos: <http://www.w3.org/2004/02/skos/core#>
 prefix dbo: <http://dbpedia.org/ontology/>
 
-DELETE { :Santi_Cazorla dbpedia2:position :Midfielder .}
-INSERT { :Santi_Cazorla dbpedia2:position :Attacker .}
+INSERT { :Santi_Cazorla foaf:name "Santi" .}
 WHERE
 {
 }

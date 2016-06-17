@@ -37,16 +37,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   private var chosenInfoboxUpdate: Seq[WikiDML] = null
   private var download_directory = "./data/downloads"
   private var ontologyPath = "ontology.xml"
-  private var mappingsSuffix = "_test.xml"
   private var mappingsPath = "mappings"
   private val placeholder = "$$$"
-  private val usedInfoboxUpdates: Seq[WikiDML] = null
-
-  private val filter = new FilenameFilter {
-    def accept(dir: File, name: String) = name endsWith ".xml"
-  }
-
-  private val formater = new TerseFormatter(true, true)
   private val parser = WikiParser.getInstance()
 
   def setConfiguration(downloadDirectory: String, ontologyName: String, mapping_Path: String) {
@@ -294,14 +286,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
             for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
               val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
 
-              // TODO: INSERT C(a)
-              //                if (condCase.mapping.asInstanceOf[TemplateMapping].mapToClass) {
-              //
-              //                  println(classMappings)
-              //
-              //                }
-
-              // in case we look for INSERT :Cazorla foaf:name 'SC'
               for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings) {
 
                 if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == update._2)
@@ -346,7 +330,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
               if (ontologyProperty.uri == update._2) {
 
-                //               println(collectTemplates(n).size)
                 for {template <- collectTemplates(n)
                      resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
                 } {
@@ -364,17 +347,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
           extractor.resolve(n, subjectUri = update._1, context = new PageContext(),
             updateSubjectUri = null, update._2, update._3, update._4)
         }
-
-      //       if (update._1.contains("__")) { //TODO:Check it
-      //          val subject = update._1.substring(0, update._1.lastIndexOf('_') - 2)
-      //          extractor.resolve(n, subjectUri =subject, context = new PageContext(),
-      //            updateSubjectUri = update._1, update._2, update._3, update._4)
-      //        }
-      //        else
-      //        {
-      //            extractor.resolve(n, subjectUri=update._1, context=new PageContext(),
-      //              updateSubjectUri=null, update._2, update._3, update._4)
-      //        }
 
       case None => Seq.empty
     }
@@ -428,9 +400,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
             }
         }
       }
-      // extract title
-      // for each infobox check if it contains in infoboxCount
-      // should call extract somewhere
       catch {
         case _: NoSuchElementException => println("Bad path name: " + pathName)
         case _: XMLStreamException => println("XML page could not be read:" + pathName)
@@ -442,9 +411,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   def countInfoboxProperties(titles: Seq[String], infoboxProperties: Seq[WikiDML]) = {
-
-    //    val contextMappings = loadOntologyAndMappings()
-    //    val extractor = new MappingExtractor(contextMappings)
 
     var infoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
     val infoboxCount = new scala.collection.mutable.HashMap[String, Int]
@@ -458,8 +424,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     println("Counting Infobox properties...")
     for (title <- titles) {
-      println(title)
-      // TODO: check if title exists in the specified path
+//      println(title)
 
       // get all properties from titles
       val pathName = download_directory + "/" + title
@@ -494,9 +459,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
             }
         }
       }
-      // extract title
-      // for each infobox check if it contains in infoboxCount
-      // should call extract somewhere
       catch {
         case _: NoSuchElementException => println("Bad path name: " + pathName)
         case _: XMLStreamException => println("XML page could not be read:" + pathName)
@@ -512,7 +474,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     var oldInfoboxCount = new scala.collection.mutable.HashMap[String, Int]
 
-    // TODO: java -> scala
     /* Load the stats hashmap */
     try {
       val fileIn = new FileInputStream("./data/downloads/infobox-count-" + title + ".ser")
@@ -525,8 +486,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     catch {
       case _: Exception => {}
     }
-
-    //    println(infoboxCount)
 
     var newInfoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
 
@@ -541,8 +500,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     // get all properties from titles
     val pathName = download_directory + file
-    //    val newPath: Path = Path.fromString(pathName)
-    //    newPath.createDirectory(failIfExists = false)
 
     /* Process only new ones */
     try {
@@ -562,10 +519,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
             for (infobox <- filteredInfoboxes) {
               for ((k, v) <- newInfoboxCount) {
-                // enumerate all keysets
-
                 if (infobox.keySet.contains(k.substring(k.indexOf(":") + 1))) // strip off only the property name {
-                //                  if (!infobox.property("").isEmpty)    // value should not be empty
                   newInfoboxCount(k) += 1 // add +1 to keysets
               }
             }
@@ -578,9 +532,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     val res = oldInfoboxCount ++ newInfoboxCount
 
-    //    println(scala.util.parsing.json.JSONObject(infoboxCount.toMap))
-
-    // TODO: java -> scala
     try {
       val fileOut = new FileOutputStream("./data/downloads/infobox-count-" + title + ".ser")
       val out = new ObjectOutputStream(fileOut)
@@ -746,14 +697,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
                     val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
 
-                    // TODO: INSERT C(a)
-                    //                if (condCase.mapping.asInstanceOf[TemplateMapping].mapToClass) {
-                    //
-                    //                  println(classMappings)
-                    //
-                    //                }
-
-                    // in case we look for INSERT :Cazorla foaf:name 'SC'
                     for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings) {
 
                       if (propertyMapping.isInstanceOf[ConstantMapping]) {
@@ -788,26 +731,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
                         }
                       }
-
-                      //                      if (propertyMapping.isInstanceOf[SimplePropertyMapping]) {
-                      //
-                      //                        val templateProperty = propertyMapping.asInstanceOf[SimplePropertyMapping].templateProperty
-                      //                        val ontologyProperty = propertyMapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
-                      //
-                      //                        if (ontologyProperty.uri == tPredicate) {
-                      //
-                      //                           for {
-                      //                                template <- collectTemplates(n)
-                      //                                resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                      //                           }
-                      //                           {
-                      //                            //println(templateMapping._1 + " == " + resolvedTitle)
-                      ////                             if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                      //                             subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
-                      //                          }
-                      //
-                      //                        }
-                      //                      }
 
                     }
                   }
@@ -961,23 +884,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         del += quad
     }
 
-    //    val oldView = renderForLanguage(testDataRootDir, Language.English)
-    //    //println(oldView)
-    //
-    //    chosenInfoboxUpdate = wikiUpdate
-    //    val newView = renderForLanguage(testDataRootDir, Language.English)
-    //    //println(newView)
-    //
-    //    // Quads to INSERT
-    //
-    //    val insert = newView.diff(oldView)
-    //
-    //    // Quads to DELETE
-    //    val delete = oldView.diff(newView)
-    //
-    //    println("Quads to DELETE:\n" + delete)
-    //    println("Quads to INSERT:\n" + insert)
-
     new Tuple2(del, ins)
 
   }
@@ -1057,14 +963,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
 
-  private val wikiUpdates = new scala.collection.mutable.HashMap[String, Seq[WikiDML]]
-  // private val dataset = TDBFactory.createDataset(download_directory + "/" + "TDB")
-
-
   def checkConsistency(update: Seq[WikiDML], view: Seq[Quad] = null): Boolean = {
-
-    // extract the changes as set of deletes and inserts given the wikiDML
-    // reference to the view ?
 
     var result: ArrayBuffer[Quad] = new ArrayBuffer[Quad]()
 
@@ -1076,7 +975,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       result ++= view
 
       // extract the subject
-      var title = update(0).wikiPage // fixme: they should both have same subject?
+      var title = update(0).wikiPage
 
       if (title.indexOf("/") != -1)
         title = title.substring(title.lastIndexOf("/") + 1)
@@ -1101,12 +1000,10 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
           if (quad.subject == subj && quad.predicate == pred
             && quad.value == obj) // context?
-            result.remove(i) // TODO: break
+            result.remove(i)
         }
       }
-      //      result --= diff._1
-
-      result ++= diff._2 // fixme: check as in deletes before you insert
+      result ++= diff._2
       //      result.toSet
 
       // serialize the quads to a file (remember Scala Quads can't be used in Jena)
@@ -1507,8 +1404,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   def getQueryForResourcesWithSamePredicates(update: UpdateRequest, limit: Int, predicate: String, classType: String) = {
 
-    //if (update)
-    //val atomicUpdate = instantiateGeneralUpdate(update)
     val groupedAtomicUpdate = groupUpdateBySubject(update)
     val inserts = groupedAtomicUpdate._2
 
@@ -1516,37 +1411,15 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     val dataset = "SELECT DISTINCT ?Y \n" +
       "WHERE { ?Y a " + classType + " . \n" +
-      //              "?Y <http://dbpedia.org/ontology/deathPlace> ?Z2 . \n" +
-      //    "?Y <http://dbpedia.org/ontology/occupation> ?Z1 . \n" +
       "?Y <" + predicate + "> ?Z2 . \n" +
-      // "FILTER NOT EXISTS {?Y <http://xmlns.com/foaf/0.1/name> ?Z1 FILTER (?Z1 != ?Z2) \n" +
-      //        "?Y <http://dbpedia.org/ontology/deathPlace> ?Z1 FILTER (?Z1 != ?Z2) \n" +
       "} LIMIT " + limit
-    //    println(dataset)
     res += dataset
 
-    //    for ((subject, properties) <- inserts) {
-    //
-    //      var query = ""
-    //
-    //      query += "SELECT DISTINCT ?Y \nWHERE { "
-    ////      query += "<" + subject.getURI + ">" + " a <http://dbpedia.org/ontology/SoccerPlayer> . \n"
-    //      query += "?Y a <http://dbpedia.org/ontology/SoccerPlayer> . \n"
-    //
-    //      var i = 0
-    //      for (property <- properties) {
-    //          i += 1
-    //          val newVar = "?Z" + i
-    //          query += "?Y " + "<" + property.getPredicate + "> " + newVar + " . \n"
-    //      }
-    //      query += "} LIMIT " + limit
-    //      res += query
-    //    }
 
     res
   }
 
-  def getQueryResultsFromLocalDBpedia(queryStr: String) =
+  def getQueryResultsFromDBpedia(queryStr: String) =
   {
     var res: ResultSet = null
     val query = QueryFactory.create(queryStr)
@@ -1728,12 +1601,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         else
           println("The update: " + choiceDML + " is not consistent")
 
-        val b2 = test.checkConsistency(choiceDML, null)
-
-        if (b2)
-          println("The update2: " + choiceDML + " is consistent")
-        else
-          println("The update2: " + choiceDML + " is not consistent")
       }
     }
 
@@ -1773,59 +1640,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         else
           println("The update: " + update + " is not consistent")
 
-        //    val b2 = test.checkConsistency(update)
-        //
-        //    if (b2)
-        //      println("The update2: " + update + " is consistent")
-        //    else
-        //      println("The update2: " + update + " is not consistent")
-
       }
-
-    }
-
-    object TestMainMethod {
-
-      def main(args: Array[String]): Unit = {
-
-        // start with a sparql update
-        // resolve it --> wikiDMLs
-        // choose one update --> keep in a mit
-        // st
-        // generate del/ins --> consolidate the list
-
-        val testDataRootDir = null
-        val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
-
-        val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
-        val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
-
-        var atomicUpdate: UpdateRequest = null
-        if (updateMod.getWherePattern.toString.contains("?")) {
-          // general update contains one variable at least
-          atomicUpdate = test.instantiateGeneralUpdate(update)
-        }
-        else
-          atomicUpdate = update
-
-        var resolvedWikiDML = test.resolveUpdate(atomicUpdate) _1 // set of sets
-
-        while (resolvedWikiDML.size > 0) {
-
-          println(resolvedWikiDML)
-
-          val indexI = JOptionPane.showInputDialog("Choose one update?").toInt
-
-          if (resolvedWikiDML(indexI).size > 1) {
-            val indexJ = JOptionPane.showInputDialog("Choose one update?").toInt
-          }
-
-        }
-
-
-      }
-
 
     }
 
@@ -1894,11 +1709,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               newValue = "Dennis", operation = "INSERT"),
             new WikiDML("http://en.wikipedia.org/wiki/Dennis_Bergkamp", "Infobox football biography", "death_place",
               newValue = "Dennis", operation = "INSERT"),
-
-            //        new WikiDML("http://en.wikipedia.org/wiki/Dennis_Bergkamp", "Infobox football biography", "cityofdeath",
-            //          newValue="Dennis", operation="INSERT"),
-            //        new WikiDML("http://en.wikipedia.org/wiki/Dennis_Bergkamp", "Infobox football biography", "countryofdeath",
-            //          newValue="Dennis", operation="INSERT"),
 
             new WikiDML("http://en.wikipedia.org/wiki/Dennis_Bergkamp", "Infobox football biography", "youthclubs",
               newValue = "Dennis", operation = "INSERT"),
@@ -2087,10 +1897,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               newValue = "London", operation = "INSERT"))
 
 
-
-
-        // more properties ...
-
         println(test.countInfoboxProperties(filePath, infoboxProperties, title))
       }
 
@@ -2126,9 +1932,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val updateMod: UpdateModify = update.getOperations.get(0).asInstanceOf[UpdateModify]
         val insertQuads = updateMod.getInsertQuads
 
-
-
-            val classType:String = "<http://dbpedia.org/ontology/Settlement>"
+        val classType:String = "<http://dbpedia.org/ontology/Settlement>"
 //        val classType:String = "<http://dbpedia.org/ontology/SoccerPlayer>"
         //    val classType:String = "<http://dbpedia.org/ontology/Band>"
         //    val classType:String = "<http://dbpedia.org/ontology/AdministrativeRegion>"
@@ -2147,7 +1951,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         for (query <- queries) {
 
-          val rs = test.getQueryResultsFromLocalDBpedia(query)
+          val rs = test.getQueryResultsFromDBpedia(query)
 
           while (rs.hasNext()) {
 
@@ -2187,6 +1991,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val mappingFileSuffix = ".xml"
         val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
+        // defaults
         var updateStr = "./data/updates/dbpedia04.ru"
         var classType = "<http://dbpedia.org/ontology/SoccerPlayer>"
         var sampleSize = 100
@@ -2220,7 +2025,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         for (query <- queries) {
 
-          val rs = test.getQueryResultsFromLocalDBpedia(query)
+          val rs = test.getQueryResultsFromDBpedia(query)
 
           while (rs.hasNext()) {
 
@@ -2248,16 +2053,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       def main(args: Array[String]): Unit = {
 
-        //  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //  Start with no infobox and general mapping (no prefix)
-        //  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
         val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
-        //  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //  Instantiate General update to DBpedia and Group it by Subject
-        //  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
         val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
 
@@ -2292,10 +2093,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val rewUpdate = test.applyUpdateSemantics(update, "brave")
 
-
         println(rewUpdate)
-
-
       }
 
     }
@@ -2318,8 +2116,6 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val ins = test.getGroundTriplesFromUpdate(update)._2
 
         test.update = ins(0)
-
-        //    test.update = ("Santi_Cazorla", "http://xmlns.com/foaf/0.1/name", "SC", "INSERT")
 
         val res = test.resolveForLanguage(testDataRootDir, Language.English)
 
@@ -2345,19 +2141,10 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // inserts
         val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
           new WikiDML("Santi_Cazorla", "infobox football biography", "playername", newValue = "Santi CZ", operation = "INSERT"))
-        //new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "managerYears", newValue="Arsenal", operation="INSERT"))
-
-
-        //  val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue="Santi", operation="INSERT"),
-        //    new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue="Santi CZ", operation="INSERT"))
-
-        //  val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "playername", newValue="Santi", operation="INSERT"),
-        //    new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue="Santi CZ", operation="INSERT"))
 
         println(test.getDiffFromInfoboxUpdate(choiceDML))
 
       }
-
     }
 
     // use this for extracting a page
@@ -2372,59 +2159,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val mappingFileSuffix = "_test.xml"
         val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
-        // val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
-
-        //  val test = new InfoboxSandboxCustom()
-        // println(test.checkConsistency(update))
-
-        //val choiceDML = new WikiDML("http://en.wikipedia.org/wiki/thierry_henry", "infobox football biography", property = "managerYears", newValue="Arsenal", operation="INSERT")
-        //test.getDiffFromInfoboxUpdate(choiceDML)
-
-        //    val t = ("Thierry_Henry", "http://xmlns.com/foaf/0.1/name", "Thierry Henry", "INSERT")
-        //    test.resolveUpdate(t)
-
-
         println(test.renderForLanguage(testDataRootDir, Language.English))
-        // SPARQL/Update: OPTIONAL
-        // INSERT :Thierry_Henry :foaf_name "Thierry Henry"
-        // INSERT :Thierry_Henry__1 :team :Arsenal_FC
-        //    val t = ("Thierry_Henry", "http://xmlns.com/foaf/0.1/name", "Thierry Henry", "INSERT")
 
-        //     2nd SCENARIO
-
-        //    val oldView = test.render()
-        //    val choiceDML = new WikiDML("http://en.wikipedia.org/wiki/thierry_henry", "infobox football biography", property = "managerYears", newValue="Arsenal", operation="INSERT")
-
-        //    val choiceDML = new WikiDML("http://en.wikipedia.org/wiki/thierry_henry", "infobox football biography", property = "name", newValue="Thierry Henry", operation="DELETE")
-        //    val choiceDML = new WikiDML("http://en.wikipedia.org/wiki/thierry_henry", "infobox football biography", property = "name", oldValue="Thierry Henry\n", newValue="Titi", operation="UPDATE")
-
-        // -- 1st SCENARIO
-
-        //    val t = ("Thierry_Henry", "http://dbpedia.org/ontology/team", "Arsenal", "INSERT")
-
-        //    test.update = t
-        //    res ++= test.resolve()
-        //    println(res)
-        //
-        //    for (number <- io.Source.stdin.getLines) {
-        //
-        //      println("User has chosen the update with number:" + number);
-        //      val choiceDML = res(number.toInt - 1)
-        //      println(choiceDML)
-        //
-        //      test.chosenUpdate = choiceDML
-        //
-        //      println(test.render())
-        //
-        //n
-        //    }
-
-        // now given a DML i have to change the infobox
-
-
-        // now here you must check for the extracted triples
-
-
-        //    test.render()
       }
 }

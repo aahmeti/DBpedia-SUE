@@ -64,13 +64,10 @@
 			<scope>provided</scope> <!-- added to try to mitigate the problem: http://stackoverflow.com/questions/21950908/jar-file-failed-to-load-in-tomcat-webapps -->
 		</dependency>
 		<dependency>
-			<groupId>org.wu.ac.at</groupId>
+			<groupId>at.ac.wu</groupId>
 			<artifactId>extractor</artifactId>
 			<version>0.1</version>
-			<!-- <scope>system</scope> <systemPath>${project.basedir}/lib/core-4.0-TEST-jar-with-dependencies.jar</systemPath> -->
-		</dependency>
-		<!-- <dependency> <groupId>org.glassfish.distributions</groupId> <artifactId>web-all</artifactId> 
-			<version>10.0-build-20080430</version> <scope>test</scope> </dependency> -->
+		</dependency> 
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

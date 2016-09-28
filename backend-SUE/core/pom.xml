@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.dbpedia</groupId>
-        <artifactId>extraction</artifactId>
-        <version>4.1-SNAPSHOT</version>
+        <groupId>at.ac.wu</groupId>
+        <artifactId>extframework</artifactId>
+        <version>0.1</version>
     </parent>
 
-    <groupId>org.dbpedia.extraction</groupId>
-    <artifactId>core</artifactId>
+    <groupId>at.ac.wu</groupId>
+    <artifactId>extractor</artifactId>
     <name>DBpedia Core Libraries</name>
 
     <repositories>
@@ -199,6 +199,7 @@
               <artifactId>wdtk-datamodel</artifactId>
               <version>0.4.0</version>
          </dependency>
+
 
         <dependency>
             <groupId>org.scala-lang</groupId>

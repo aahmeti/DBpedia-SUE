@@ -16,4 +16,8 @@ class WikiDML(val wikiPage:String, val infobox: String, val property:String, val
         operation.toUpperCase() + " InfoboxTemplate(" + infobox + ")." + property + ";\n"
 
   }
+  def exportString():String =
+  {
+    return wikiPage + "$$" + infobox + "$$" + property + "$$" + oldValue + "$$" + newValue + "$$" + operation + "$$"
+  }
 }

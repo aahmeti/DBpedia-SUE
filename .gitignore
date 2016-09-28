@@ -1,0 +1,6 @@
+# remove the maven output directory
+target/
+# idea directory as well
+.idea/
+
+*.iml

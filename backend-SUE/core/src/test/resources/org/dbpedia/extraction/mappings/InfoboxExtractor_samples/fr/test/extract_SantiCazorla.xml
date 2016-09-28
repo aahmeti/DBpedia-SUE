@@ -1,0 +1,36 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.8/ http://www.mediawiki.org/xml/export-0.8.xsd" version="0.8" xml:lang="fr">
+  <page>
+    <title>Santi Cazorla</title>
+    <ns>0</ns>
+    <id>19845</id>
+    <revision>
+      <id>92467054</id>
+      <parentid>92272061</parentid>
+      <timestamp>2013-04-25T17:18:50Z</timestamp>
+      <contributor>
+        <username>ManiacParisien</username>
+        <id>838989</id>
+      </contributor>
+      <minor />
+      <text xml:space="preserve">
+{{Use British English|date=February 2013}}
+{{Use dmy dates|date=February 2013}}
+{{Spanish name|Cazorla|González}}
+{{Infobox football biography
+| name = Santi
+| surname = Cazorla
+| position = [[Midfielder]]
+| birth_date  = {{birth date and age|1984|12|13|df=y}}
+| albin_date  = {{birth date and age|1994|12|13|df=y}}
+| vadim_date  = {{birth date and age|2004|12|13|df=y}}
+| youthyears1 = 1992–1996
+| youthclubs1 = [[CD Covadonga|Covadonga]]
+}}      
+      </text>
+      <sha1>6yw8s7gv1b5pjh03klmwzq0ggjex3pl</sha1>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+    </revision>
+  </page>
+
+</mediawiki>

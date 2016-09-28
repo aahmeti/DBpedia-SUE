@@ -1,7 +1,0 @@
-wikiStats|mk
-
-redirects|0
-
-templates|0
-
-

@@ -55,7 +55,7 @@ public class MyResource {
     			"{"+
     			"}";
     	 //InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,"");
-    	InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,"_test.xml");
+    	InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,"_test.xml",null,null,null);
     	 info.setConfiguration(localPath, localPathOntology,localPathMappings);
     	 info.checkConsistencyFromUpdate(testQuery);
     

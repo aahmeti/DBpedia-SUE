@@ -39,8 +39,8 @@ import org.json.JSONObject;
 /**
  * Root resource (exposed at "myresource" path)
  */
-@Path("/ajaxquery")
-public class ajaxquery {
+@Path("/ajaxquerySingleton")
+public class ajaxquerySingleton {
 
 	@Context
 	ServletContext context;
@@ -94,21 +94,8 @@ public class ajaxquery {
 		try {
 		
 			HttpSession session = req.getSession(true);
-			InfoboxSandboxCustom info = (InfoboxSandboxCustom) session.getAttribute("InfoboxSandboxCustom");
-			if (info == null) {
-				//InfoboxSandboxCustom info = new InfoboxSandboxCustom(null, "_ambig.xml"); 
-				 info = new InfoboxSandboxCustom(null, ".xml");
-				// for
-				System.out.println("well created! new InfoboxSandboxCustom"); // inserts
-				info.setConfiguration(localPath, localPathOntology,
-						localPathMappings);
-				System.out.println("wel set config"); // inserts
-				// info.checkConsistencyFromUpdate(query);
-				session.setAttribute("InfoboxSandboxCustom", info); 
-			}
-			else{
-				System.out.println("read from Cache!"); // inserts
-			}
+			InfoboxSandboxCustom info = Init.getInfoboxSandboxCustom();
+			
 			/*
 			 * Minor check query
 			 */
@@ -128,6 +115,7 @@ public class ajaxquery {
 
 			Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>, scala.collection.mutable.ArrayBuffer<String>> update = info
 					.updateFromUpdateQuery(query);
+			System.out.println("update:"+update);
 			String jscript = "";
 
 			/*

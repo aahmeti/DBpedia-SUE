@@ -97,7 +97,7 @@ public class ajaxCheckConsistency {
 		String localPathMappings = context.getRealPath(PATH_MAPPINGS);
 		
 		InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,
-				"_ambig.xml"); // this
+				"_ambig.xml",null,null,null); // this
 								// worked
 
 		// for

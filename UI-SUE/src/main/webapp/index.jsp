@@ -532,7 +532,7 @@ INSERT { ?a foaf:name "El Bicho" . }
 WHERE {?a foaf:name "Santi Cazorla"@en . }
 </textarea>
 			<input type="text" style="display: none;" name="valueAction"
-				id="valueAction" value="webapi/ajaxquery"></input>
+				id="valueAction" value="webapi/ajaxquerySingleton"></input>
 			<fieldset>
 				<label for="default-graph-uri">Data Set Name (Graph
 					IRI)</label><br> <input type="text" name="default-graph-uri"

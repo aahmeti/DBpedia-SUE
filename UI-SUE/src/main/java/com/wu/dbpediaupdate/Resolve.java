@@ -132,7 +132,7 @@ public class Resolve {
 				// Uncomment to try with a reduced version of mappings
 				// InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,
 				// "_ambig.xml");
-				info = new InfoboxSandboxCustom(null, ".xml");
+				info = new InfoboxSandboxCustom(null, ".xml",null,null,null);
 				info.setConfiguration(localPath, localPathOntology,
 						localPathMappings);
 				session.setAttribute("InfoboxSandboxCustom", info); //save in session

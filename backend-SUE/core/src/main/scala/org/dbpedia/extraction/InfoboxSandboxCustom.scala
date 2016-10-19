@@ -32,14 +32,61 @@ import org.dbpedia.extraction.ontology.Ontology
 
 import scala.language.reflectiveCalls
 
-class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:String) {
+class Context(){
+
+}
+class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:String,downloadDirectory: String="./data/downloads", ontologyName: String= "ontology.xml", mapping_Path: String= "mappings") {
   var update: Tuple4[java.lang.String, java.lang.String, java.lang.String, java.lang.String] = null
   private var chosenInfoboxUpdate: Seq[WikiDML] = null
-  private var download_directory = "./data/downloads"
-  private var ontologyPath = "ontology.xml"
-  private var mappingsPath = "mappings"
+  private var download_directory = downloadDirectory
+  private var ontologyPath = ontologyName
+  private var mappingsPath = mapping_Path
+  //private var download_directory = "./data/downloads"
+  //private var ontologyPath = "ontology.xml"
+  //private var mappingsPath = "mappings"
   private val placeholder = "$$$"
   private val parser = WikiParser.getInstance()
+
+
+  // can't we call a function for this?
+
+  val ontoFilePath = ontologyPath
+  val ontoFile = new File(ontoFilePath)
+  val ontologySource = XMLSource.fromFile(ontoFile, Language.Mappings)
+  val ontoObj = new OntologyReader().read(ontologySource)
+
+  private var context = new {
+
+    def ontology = ontoObj
+
+    def language = Language.English
+
+    def mappingPageSource = {
+      val namespace = Namespace.mappings(language)
+
+      val file = new File(mappingsPath,
+        namespace.name(Language.Mappings).replace(' ', '_') +
+          mappingFileSuffix)
+
+      XMLSource.fromFile(file, Language.Mappings)
+
+    }
+
+    def redirects = new Redirects(Map())
+
+  }
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Loading mappings and redirects
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  private var contextMappings = new {
+   // println("context create!")
+    def mappings: Mappings = MappingsLoader.load(context)
+    def temp=mappings.templateMappings
+    def redirects: Redirects = new Redirects(Map())
+  }
+  private var extractor =  new MappingExtractor(contextMappings)
+
 
   def setConfiguration(downloadDirectory: String, ontologyName: String, mapping_Path: String) {
     download_directory = downloadDirectory
@@ -47,25 +94,29 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     mappingsPath = mapping_Path
   }
 
+
+
+
   def setUpdate(tp: Tuple4[java.lang.String, java.lang.String, java.lang.String, java.lang.String]) {
     update = tp
   }
 
   def resolveForLanguageFromUI() = {
-    println("download_directory:" + download_directory + "/Santi_Cazorla/705145701.xml")
+   // println("download_directory:" + download_directory + "/Santi_Cazorla/705145701.xml")
     val testDataRootDir = new File(download_directory + "/Santi_Cazorla/705145701.xml")
     resolveForLanguage(testDataRootDir, Language.English)
   }
 
   /**
    * Resolves a ground update to a set of sets of WikiDMLs
-   * @param file wiki page
+    *
+    * @param file wiki page
    * @param _language langage of mappings
    * @return
    */
   def resolveForLanguage(file: File, _language: Language) = {
 
-    println("test file " + file.getName())
+  //  println("test file " + file.getName())
 
     val ontoFilePath = ontologyPath
     val ontoFile = new File(ontoFilePath)
@@ -105,13 +156,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Main entry function: Renders a wiki page to a set of Quads
-   * @param file wiki page
+    *
+    * @param file wiki page
    * @param _language language of the mappings
    * @return Set of Quads
    */
   def renderWithChangesForLanguage(file: File, _language: Language): Seq[Quad] = {
 
-    println("test file " + file.getName())
+    //println("test file " + file.getName())
 
     val ontoFilePath = ontologyPath
     val ontoFile = new File(ontoFilePath)
@@ -142,14 +194,15 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Renders a wiki page to a set of Quads
-   * @param file the wiki page
+    *
+    * @param file the wiki page
    * @param context the mappings and ontology
    * @param folder folder of the wiki page
    * @return
    */
   private def renderWithChanges(file: String, context: AnyRef {def ontology: Ontology; def language: Language; def redirects: Redirects; def mappingPageSource: Traversable[WikiPage]}, folder: File): Seq[Quad] = {
     var result: Seq[Quad] = Seq.empty
-
+/*
     val contextMappings = new {
       def mappings: Mappings = MappingsLoader.load(context)
 
@@ -157,7 +210,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     }
 
     val extractor = new MappingExtractor(contextMappings)
-
+*/
     //    println("input file : " + folder + "/" + file)
     val page = //new FileSource(folder, context.language, _ endsWith file).head
       XMLSource.fromFile(new File(folder.getPath()), context.language).head
@@ -175,13 +228,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Main entry function: Renders a wiki page to a set of Quads
-   * @param file wiki page
+    *
+    * @param file wiki page
    * @param _language language of the mappings
    * @return Set of Quads
    */
   def renderForLanguage(file: File, _language: Language): Seq[Quad] = {
 
-    println("test file " + file.getName())
+    //println("test file " + file.getName())
 
     val ontoFilePath = ontologyPath
     val ontoFile = new File(ontoFilePath)
@@ -212,7 +266,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Renders a wiki page to a set of Quads
-   * @param file the wiki page
+    *
+    * @param file the wiki page
    * @param context the mappings and ontology
    * @param folder folder of the wiki page
    * @return
@@ -220,14 +275,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   private def render(file: String, context: AnyRef {def ontology: Ontology; def language: Language; def redirects: Redirects; def mappingPageSource: Traversable[WikiPage]}, folder: File): Seq[Quad] = {
     var result: Seq[Quad] = Seq.empty
 
-    val contextMappings = new {
+    /*val contextMappings = new {
       def mappings: Mappings = MappingsLoader.load(context)
 
       def redirects: Redirects = new Redirects(Map())
     }
 
     val extractor = new MappingExtractor(contextMappings)
-
+*/
     //    println("input file : " + folder + "/" + file)
     val page = //new FileSource(folder, context.language, _ endsWith file).head
       XMLSource.fromFile(new File(folder.getPath()), context.language).head
@@ -247,7 +302,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Resolves a ground triple Tuple4 of an instantiated SPARQL update
-   * @param file the name of the file of the wiki page
+    *
+    * @param file the name of the file of the wiki page
    * @param context mappings fixme: no need for ontology?
    * @param folder the folder of the file
    * @return a Set of Sets of WikiDMLs
@@ -260,14 +316,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     // Loading mappings and redirects
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    val contextMappings = new {
+   /* val contextMappings = new {
       def mappings: Mappings = MappingsLoader.load(context)
 
       def redirects: Redirects = new Redirects(Map())
     }
 
     val extractor = new MappingExtractor(contextMappings)
-
+*/
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Loading a page from a XML file
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -422,7 +478,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         infoboxTitles += wikiDML.infobox.toUpperCase
     }
 
-    println("Counting Infobox properties...")
+   // println("Counting Infobox properties...")
     for (title <- titles) {
 //      println(title)
 
@@ -552,49 +608,10 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     val wikiDML = new ArrayBuffer[ArrayBuffer[Seq[WikiDML]]]
     val titles = new ArrayBuffer[String]
 
-    // can't we call a function for this?
-    val ontoFilePath = ontologyPath
-    val ontoFile = new File(ontoFilePath)
-    val ontologySource = XMLSource.fromFile(ontoFile, Language.Mappings)
-    val ontoObj = new OntologyReader().read(ontologySource)
-
-    val context = new {
-
-      def ontology = ontoObj
-
-      def language = Language.English
-
-      def mappingPageSource = {
-        val namespace = Namespace.mappings(language)
-
-        val file = new File(mappingsPath,
-          namespace.name(Language.Mappings).replace(' ', '_') +
-            mappingFileSuffix)
-
-        XMLSource.fromFile(file, Language.Mappings)
-
-      }
-
-      def redirects = new Redirects(Map())
-
-    }
-
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Loading mappings and redirects
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    val contextMappings = new {
-      def mappings: Mappings = MappingsLoader.load(context)
-
-      def redirects: Redirects = new Redirects(Map())
-    }
-
-    val extractor = new MappingExtractor(contextMappings)
-
+    //println("groupbysubject")
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Loading a page from a XML file
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     val groupedUpdate = groupUpdateBySubject(update)
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -650,6 +667,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     }
 
+   // println("Resolve INSERTs")
+
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Resolve INSERTs
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -672,11 +691,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       val url = "https://en.wikipedia.org/w/api.php?" +
         "action=query&prop=revisions&format=xml&rvprop=ids|timestamp|userid|sha1|content&rvlimit=1&rvgeneratexml=&rvcontentformat=text%2Fx-wiki&rvstart=now&rvdir=older&exportnowrap=&titles=" + title // " + revision_limit + "
 
+     // println("Create Logic")
       val extractLogic = new ExtractLogic
 
       try {
 
+       // println("Extract Logic")
         val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
+
 
         val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
@@ -690,8 +712,10 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               val tPredicate = triple.getPredicate.toString
               val tObject = triple.getObject.toString
 
-              for (templateMapping <- contextMappings.mappings.templateMappings) {
-
+              //println("For each templateMapping")
+             // for (templateMapping <- contextMappings.mappings.templateMappings) {
+              for (templateMapping <- contextMappings.temp) {
+                //println("insider")
                 if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
                   for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
 
@@ -769,7 +793,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                       val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
                       val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
 
-                      println(templateProperty + " --> " + ontologyProperty)
+                     // println(templateProperty + " --> " + ontologyProperty)
 
                       if (ontologyProperty.uri == tPredicate) {
 
@@ -802,7 +826,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Collects all templates from a page
-   * @param node
+    *
+    * @param node
    * @return
    */
   private def collectTemplates(node: Node): List[TemplateNode] = {
@@ -821,11 +846,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * fixme: Calculates the triples which are deleted and inserted
-   * @param wikiUpdate
+    *
+    * @param wikiUpdate
    * @return
    */
   def getDiffFromInfoboxUpdate(wikiUpdate: Seq[WikiDML], wikiPage: String = null) = {
-
+    //println("getDiffFromInfoboxUpdate")
     var oldView = new ArrayBuffer[Quad]()
     var newView = new ArrayBuffer[Quad]()
 
@@ -891,7 +917,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Groups a SPARQL update by subject
-   * @param update
+    *
+    * @param update
    * @return a Tuple2 of deletes and inserts
    */
   def groupUpdateBySubject(update: UpdateRequest) = {
@@ -928,7 +955,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Loads Ontology of DBpedia and Mappings which use the former
-   * @return contextMappings
+    *
+    * @return contextMappings
    */
   def loadOntologyAndMappings() = {
 
@@ -1106,7 +1134,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     var extractedQuads: Seq[Quad] = Seq.empty
 
     val folder = new File(download_directory)
-    val contextMappings = loadOntologyAndMappings()
+   // val contextMappings = loadOntologyAndMappings()
 
     val pathName = folder.getPath() + "/" + sTitle
     val newPath: Path = Path.fromString(pathName)
@@ -1122,7 +1150,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       val page = XMLSource.fromFile(new File(download_directory + "/" + sTitle + "/" + revID + ".xml"), Language.English).head
 
-      val extractor = new MappingExtractor(contextMappings)
+    //  val extractor = new MappingExtractor(contextMappings)
       //  @Javi> mappings are in extractor, under templateMappings = context.mappings.templateMappings.
       parser(page) match {
         case Some(n) =>
@@ -1150,7 +1178,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     var extractedQuads: Seq[Quad] = Seq.empty
 
     val folder = new File(download_directory)
-    val contextMappings = loadOntologyAndMappings()
+    //val contextMappings = loadOntologyAndMappings()
 
     val pathName = folder.getPath() + "/" + sTitle
     val newPath: Path = Path.fromString(pathName)
@@ -1166,7 +1194,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       val page = XMLSource.fromFile(new File(download_directory + "/" + sTitle + "/" + revID + ".xml"), Language.English).head
 
-      val extractor = new MappingExtractor(contextMappings)
+     // val extractor = new MappingExtractor(contextMappings)
       //  @Javi> mappings are in extractor, under templateMappings = context.mappings.templateMappings.
       parser(page) match {
         case Some(n) =>
@@ -1187,7 +1215,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Checks if SPARQL update is consistent or not
-   * @param update
+    *
+    * @param update
    * @return true if update is consistent
    */
 
@@ -1200,7 +1229,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     val del = subjectGroup._1
     val ins = subjectGroup._2
 
-    val contextMappings = loadOntologyAndMappings()
+    //val contextMappings = loadOntologyAndMappings()
 
     val folder = new File(download_directory)
     var subjQuads: collection.mutable.ArrayBuffer[Quad] = new ArrayBuffer[Quad]()
@@ -1231,7 +1260,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
-        val extractor = new MappingExtractor(contextMappings)
+        //val extractor = new MappingExtractor(contextMappings)
         //  @Javi> mappings are in extractor, under templateMappings = context.mappings.templateMappings.
         parser(page) match {
           case Some(n) =>
@@ -1439,7 +1468,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   /**
    * Instantiates a general SPARQL update -- Where clause to live dbpedia
-   * @param update
+    *
+    * @param update
    * @return Ground update
    */
   def instantiateGeneralUpdate(update: UpdateRequest): UpdateRequest = {
@@ -1487,7 +1517,9 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   def updateFromUpdateQuery(updateQuery: String) = {
+    //println("update!")
     val update = UpdateFactory.create(updateQuery)
+    //println("create!")
     val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
 
     var atomicUpdate: UpdateRequest = null
@@ -1498,6 +1530,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     else
       atomicUpdate = update
 
+    //println("resolveupdate!")
     resolveUpdate(atomicUpdate)
   }
 
@@ -1512,7 +1545,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   /**
    * Transforms an update to a set of tuples of length 4, for both delete and insert
    * Tuple4(subject, predicate, object, operation)
-   * @param update
+    *
+    * @param update
    * @return a Tuple2 for both delete and insert
    */
   def getGroundTriplesFromUpdate(update: UpdateRequest) = {
@@ -1569,7 +1603,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
-        val test = new InfoboxSandboxCustom(null, "")
+        val test = new InfoboxSandboxCustom(null, "",null,null,null)
         val ans = test.getGroundTriplesFromUpdate(update)
 
         for (del <- ans._1) println(del)
@@ -1586,7 +1620,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = new File("./data/downloads/Santi_Cazorla/709848090.xml") // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
           new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "playername", newValue = "Santi CZ", operation = "INSERT"),
@@ -1611,7 +1645,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = null // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val title = "Santi_Cazorla"
 
@@ -1629,7 +1663,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = new File("./data/downloads/Thierry_Henry/test") // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -1650,7 +1684,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val titles = Seq("Santi_Cazorla", "Thierry_Henry")
 
@@ -1672,7 +1706,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val filePath = "/ISWC/english-players.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1761,7 +1795,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val filePath = "/ISWC/english-teams.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1786,7 +1820,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val filePath = "/ISWC/english-settlements.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1908,7 +1942,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -1925,7 +1959,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = ".xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia04.ru"))
 
@@ -1989,7 +2023,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = ".xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         // defaults
         var updateStr = "./data/updates/dbpedia04.ru"
@@ -2056,7 +2090,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         //  Start with no infobox and general mapping (no prefix)
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         //  Instantiate General update to DBpedia and Group it by Subject
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
@@ -2086,7 +2120,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         // update
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
@@ -2108,7 +2142,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         // update
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
@@ -2136,7 +2170,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         // inserts
         val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
@@ -2157,7 +2191,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         // Mappings suffix
         val mappingFileSuffix = "_test.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
 
         println(test.renderForLanguage(testDataRootDir, Language.English))
 

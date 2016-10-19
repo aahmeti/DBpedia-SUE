@@ -1604,7 +1604,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
-        val test = new InfoboxSandboxCustom(null, "",null,null,null)
+        val test = new InfoboxSandboxCustom(null, "")
         val ans = test.getGroundTriplesFromUpdate(update)
 
         for (del <- ans._1) println(del)
@@ -1621,7 +1621,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = new File("./data/downloads/Santi_Cazorla/709848090.xml") // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
           new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "playername", newValue = "Santi CZ", operation = "INSERT"),
@@ -1646,7 +1646,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = null // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val title = "Santi_Cazorla"
 
@@ -1664,7 +1664,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val testDataRootDir = new File("./data/downloads/Thierry_Henry/test") // no need for this, subject is taken from update
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -1685,7 +1685,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val titles = Seq("Santi_Cazorla", "Thierry_Henry")
 
@@ -1707,7 +1707,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val filePath = "/ISWC/english-players.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1796,7 +1796,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val filePath = "/ISWC/english-teams.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1821,7 +1821,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val filePath = "/ISWC/english-settlements.xml"
         val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -1943,7 +1943,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -1960,7 +1960,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = ".xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia04.ru"))
 
@@ -2024,7 +2024,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val testDataRootDir = null
         val mappingFileSuffix = ".xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         // defaults
         var updateStr = "./data/updates/dbpedia04.ru"
@@ -2121,7 +2121,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         // update
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
@@ -2143,7 +2143,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         // update
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
@@ -2171,7 +2171,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         // mappings
         val mappingFileSuffix = "_ambig.xml"
 
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         // inserts
         val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
@@ -2192,7 +2192,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         // Mappings suffix
         val mappingFileSuffix = "_test.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         println(test.renderForLanguage(testDataRootDir, Language.English))
 

@@ -51,6 +51,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   // can't we call a function for this?
 
   val ontoFilePath = ontologyPath
+  println(ontoFilePath)
   val ontoFile = new File(ontoFilePath)
   val ontologySource = XMLSource.fromFile(ontoFile, Language.Mappings)
   val ontoObj = new OntologyReader().read(ontologySource)
@@ -2089,8 +2090,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         //  Start with no infobox and general mapping (no prefix)
         val testDataRootDir = null
-        val mappingFileSuffix = "_ambig.xml"
-        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix,null,null,null)
+        val mappingFileSuffix = ".xml"
+        val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         //  Instantiate General update to DBpedia and Group it by Subject
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))

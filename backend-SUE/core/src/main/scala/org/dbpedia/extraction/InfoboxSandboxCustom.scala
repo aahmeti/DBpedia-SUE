@@ -82,10 +82,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   private var contextMappings = new {
    // println("context create!")
-    def mappings: Mappings = MappingsLoader.load(context)
-    def temp=mappings.templateMappings
-    def redirects: Redirects = new Redirects(Map())
+    val mappings: Mappings = MappingsLoader.load(context)
+    val temp=mappings.templateMappings
+    val redirects: Redirects = new Redirects(Map())
   }
+
   private var extractor =  new MappingExtractor(contextMappings)
 
 
@@ -718,8 +719,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               val tPredicate = triple.getPredicate.toString
               val tObject = triple.getObject.toString
 
-              val templateNames = collectTemplateNames(n)
-              //println("For each templateMapping")
+              println("For each templateMapping")
               // for (templateMapping <- contextMappings.mappings.templateMappings) {
               for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
               )

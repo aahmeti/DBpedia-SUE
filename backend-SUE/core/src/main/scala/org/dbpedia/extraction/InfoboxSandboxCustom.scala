@@ -606,7 +606,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
 
-  def resolveUpdate(update: UpdateRequest): (ArrayBuffer[ArrayBuffer[Seq[WikiDML]]], ArrayBuffer[String]) = {
+  def resolveUpdate(update: UpdateRequest, computeStat:Boolean=false): (ArrayBuffer[ArrayBuffer[Seq[WikiDML]]], ArrayBuffer[String]) = {
     val wikiDML = new ArrayBuffer[ArrayBuffer[Seq[WikiDML]]]
     val titles = new ArrayBuffer[String]
 
@@ -2150,6 +2150,25 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       }
 
     }
+
+  object TestNewStatistics {
+
+    def main(args: Array[String]): Unit =
+    {
+
+    val testDataRootDir = null
+    val mappingFileSuffix = ".xml"
+    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+
+    val subject = "" // change
+    val predicate = "" // change
+    val sample = 100  // change
+
+    test.getStatResults(subject, predicate, sample)
+
+  }
+
+}
 
     object TestStatistics {
 

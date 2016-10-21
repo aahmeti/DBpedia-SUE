@@ -117,7 +117,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
    */
   def resolveForLanguage(file: File, _language: Language) = {
 
-  //  println("test file " + file.getName())
+  //  println("tesft file " + file.getName())
 
     val ontoFilePath = ontologyPath
     val ontoFile = new File(ontoFilePath)
@@ -673,7 +673,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Resolve INSERTs
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    for ((subject, quads) <- groupedUpdate._2) {
+    for ((subject, quads) <- groupedUpdate._2)
+    {
 
       val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
 
@@ -681,7 +682,9 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       var title = subject.toString
 
       if (title.indexOf("/") != -1)
+      {
         title = title.substring(title.lastIndexOf("/") + 1)
+      }
 
       titles += title
 
@@ -692,54 +695,70 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       val url = "https://en.wikipedia.org/w/api.php?" +
         "action=query&prop=revisions&format=xml&rvprop=ids|timestamp|userid|sha1|content&rvlimit=1&rvgeneratexml=&rvcontentformat=text%2Fx-wiki&rvstart=now&rvdir=older&exportnowrap=&titles=" + title // " + revision_limit + "
 
-     // println("Create Logic")
+      // println("Create Logic")
       val extractLogic = new ExtractLogic
 
-      try {
+      try
+      {
 
        // println("Extract Logic")
         val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
 
-
         val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
-        parser(page) match {
+        parser(page) match
+        {
           case Some(n) =>
 
-            for (update <- quads) {
+            for (update <- quads)
+            {
 
               val triple = update.asTriple
               val tSubject = triple.getSubject.toString
               val tPredicate = triple.getPredicate.toString
               val tObject = triple.getObject.toString
 
+              val templateNames = collectTemplateNames(n)
               //println("For each templateMapping")
-             // for (templateMapping <- contextMappings.mappings.templateMappings) {
-              for (templateMapping <- contextMappings.temp) {
+              // for (templateMapping <- contextMappings.mappings.templateMappings) {
+              for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
+              )
+              {
                 //println("insider")
-                if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
-                  for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
+                if (templateMapping._2.isInstanceOf[ConditionalMapping])
+                {
+
+                  for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size)
+                  {
 
                     val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
 
-                    for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings) {
+                    for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings)
+                    {
 
-                      if (propertyMapping.isInstanceOf[ConstantMapping]) {
+                      if (propertyMapping.isInstanceOf[ConstantMapping])
+                      {
 
                         if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == tPredicate)
-                          && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject)) {
+                          && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject))
+                        {
 
                           for {template <- collectTemplates(n)
                                resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                          } {
-                            if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase) {
+                          }
+                          {
+                            if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                            {
 
                               // TODO: other conditions here
                               val condDML = new ArrayBuffer[WikiDML]
-                              if (condCase.operator == "isSet") {
+                              if (condCase.operator == "isSet")
+                              {
+
                                 condDML += new WikiDML(n.title.decoded, resolvedTitle, condCase.templateProperty, newValue = placeholder, operation = "INSERT")
 
-                                for (j <- 0 until i) {
+                                for (j <- 0 until i)
+                                {
 
                                   val condDisabled = templateMapping._2.asInstanceOf[ConditionalMapping].cases(j)
 
@@ -748,6 +767,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                                 }
 
                               }
+
                               subjwikiDML += condDML.toList
 
                             }
@@ -756,26 +776,36 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
                         }
                       }
+                      // end of "if" constant mapping
 
                     }
+                    // end of "for" all mappings in conditional case
                   }
+                  // end of "for" all cases in conditional mappings
                 }
+                // end of "if" mapping is conditional mapping
 
-                if (templateMapping._2.isInstanceOf[TemplateMapping]) {
+                if (templateMapping._2.isInstanceOf[TemplateMapping])
+                {
 
-                  for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings) {
+                  for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings)
+                  {
 
-                    if (mapping.isInstanceOf[SimplePropertyMapping]) {
+                    if (mapping.isInstanceOf[SimplePropertyMapping])
+                    {
+
                       // TODO: ConstantMapping?
                       val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
                       val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
 
-                      if (ontologyProperty.uri == tPredicate) {
+                      if (ontologyProperty.uri == tPredicate)
+                      {
 
                         for {
                           template <- collectTemplates(n)
                           resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                        } {
+                        }
+                        {
                           //println(templateMapping._1 + " == " + resolvedTitle)
                           if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
                             subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
@@ -786,22 +816,27 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                   }
                 }
 
-                if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
-                  for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings) {
+                if (templateMapping._2.isInstanceOf[ConditionalMapping])
+                {
+                  for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings)
+                  {
 
-                    if (mapping.isInstanceOf[SimplePropertyMapping]) {
+                    if (mapping.isInstanceOf[SimplePropertyMapping])
+                    {
 
                       val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
                       val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
 
                      // println(templateProperty + " --> " + ontologyProperty)
 
-                      if (ontologyProperty.uri == tPredicate) {
+                      if (ontologyProperty.uri == tPredicate)
+                      {
 
                         //               println(collectTemplates(n).size)
                         for {template <- collectTemplates(n)
                              resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                        } {
+                        }
+                        {
                           //println(templateMapping._1 + " == " + resolvedTitle)
                           if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
                             subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
@@ -838,6 +873,22 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       case _ => node.children.flatMap(collectTemplates)
     }
   }
+
+  private def collectTemplateNames(node: Node): ArrayBuffer[String] = {
+
+    var result =  new ArrayBuffer[String]
+
+    val templates = collectTemplates(node)
+
+    for (template <- templates)
+    {
+      result +=  context.redirects.resolve(template.title).decoded.toLowerCase
+
+    }
+
+    result
+  }
+
 
   def getDiffFromInfoboxUpdate_fromUI(wikiUpdate: Seq[WikiDML]) = {
     val testDataRootDir = new File(download_directory + "/Santi_Cazorla/705145701.xml")

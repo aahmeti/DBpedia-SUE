@@ -1483,10 +1483,92 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   }
 
-  def getQueryForResourcesWithSamePredicates(update: UpdateRequest, limit: Int, predicate: String, classType: String) = {
+  def getStatResults(subject: String, predicate:String, sampleSize:Int) =
+  {
 
-    val groupedAtomicUpdate = groupUpdateBySubject(update)
-    val inserts = groupedAtomicUpdate._2
+      val subjType = getSubjectType(subject)
+      val rs = getQueryResultsFromDBpedia(subjType.toString)
+
+      val resType = new ArrayBuffer[String]()
+
+      while (rs.hasNext()) {
+
+        val sol = rs.nextSolution.get("?Y").toString
+
+        resType += sol
+      }
+
+      val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicate, resType.toSeq)
+
+      val subjects = new ArrayBuffer[String]()
+
+      for (query <- queries) {
+
+        val rs = getQueryResultsFromDBpedia(query)
+
+        while (rs.hasNext()) {
+
+          val sol = rs.nextSolution.get("?Y").toString
+          //        println(sol)
+          val title = sol.substring(sol.lastIndexOf("/") + 1)
+          if (!subjects.contains(title))
+            subjects += title
+          // download the pages
+        }
+      }
+
+      //val wikiDMLs = resolveUpdate(update)
+
+      // flatten wikiDMLs
+      //val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
+
+      // TODO: fix this
+      //println(countInfoboxProperties(subjects, setWikiDML))
+
+  }
+
+  def getSubjectType(subject:String) = {
+
+    val res = ArrayBuffer[String]()
+
+    val dataset = "SELECT DISTINCT ?Y \n" +
+      "WHERE { " + subject + " a ?Y  . }"
+
+    res += dataset
+
+    res
+  }
+
+  def getQueryForResourcesWithSamePredicates(limit: Int, predicate: String, classType: Seq[String]) = {
+
+    //    val groupedAtomicUpdate = groupUpdateBySubject(update)
+    //    val inserts = groupedAtomicUpdate._2
+
+    val res = ArrayBuffer[String]()
+
+
+
+    var dataset = "SELECT DISTINCT ?Y \n" +
+                  "WHERE { "
+
+    for (cType <- classType)
+    {
+      dataset +=  "?Y a " + cType + " . \n"
+    }
+
+    dataset += "?Y <" + predicate + "> ?Z2 . \n" +
+            "} LIMIT " + limit
+
+    res += dataset
+
+
+    res
+  }
+
+  def getQueryForResourcesWithSamePredicates(limit: Int, predicate: String, classType: String) = {
+
+//    val groupedAtomicUpdate = groupUpdateBySubject(update)
+//    val inserts = groupedAtomicUpdate._2
 
     val res = ArrayBuffer[String]()
 
@@ -1998,7 +2080,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
         val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
-        val query = test.getQueryForResourcesWithSamePredicates(update, 100, null, null) // fixme
+        val query = test.getQueryForResourcesWithSamePredicates(100, null, "") // fixme
 
         println(query)
       }
@@ -2030,7 +2112,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         //     val classType:String = "<http://dbpedia.org/ontology/Skier>"
 //        val classType: String = "<http://dbpedia.org/ontology/Film>"
 
-        val queries = test.getQueryForResourcesWithSamePredicates(update, 100, insertQuads.get(0).getPredicate.toString(), classType)
+        val queries = test.getQueryForResourcesWithSamePredicates(100, insertQuads.get(0).getPredicate.toString(), classType)
         println(queries)
 
         val subjects = new ArrayBuffer[String]()
@@ -2104,7 +2186,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         val updateMod: UpdateModify = update.getOperations.get(0).asInstanceOf[UpdateModify]
         val insertQuads = updateMod.getInsertQuads
 
-        val queries = test.getQueryForResourcesWithSamePredicates(update, sampleSize,
+        val queries = test.getQueryForResourcesWithSamePredicates(sampleSize,
                                           insertQuads.get(0).getPredicate.toString(), classType)
 
         val subjects = new ArrayBuffer[String]()

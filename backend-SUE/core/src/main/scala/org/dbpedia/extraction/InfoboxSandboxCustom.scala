@@ -56,13 +56,13 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   val ontologySource = XMLSource.fromFile(ontoFile, Language.Mappings)
   val ontoObj = new OntologyReader().read(ontologySource)
 
-  private var context = new {
+  private val context = new {
 
-    def ontology = ontoObj
+    val ontology = ontoObj
 
-    def language = Language.English
+    val language = Language.English
 
-    def mappingPageSource = {
+    val mappingPageSource = {
       val namespace = Namespace.mappings(language)
 
       val file = new File(mappingsPath,
@@ -73,14 +73,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     }
 
-    def redirects = new Redirects(Map())
+    val redirects = new Redirects(Map())
 
   }
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Loading mappings and redirects
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  private var contextMappings = new {
+  private val contextMappings = new {
    // println("context create!")
     val mappings: Mappings = MappingsLoader.load(context)
     val temp=mappings.templateMappings

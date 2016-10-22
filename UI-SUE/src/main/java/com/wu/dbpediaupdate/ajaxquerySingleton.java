@@ -54,6 +54,7 @@ public class ajaxquerySingleton {
 	private static final String PATH_DOWNLOADS = "/WEB-INF/downloads";
 	private static final String PATH_MAPPINGS = "/WEB-INF/mappings";
 
+	private static final Integer MAX_SAMPLING = 300;
 	@POST
 	@Produces(MediaType.TEXT_HTML)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -453,6 +454,9 @@ public class ajaxquerySingleton {
 						if (sample != null) {
 							try {
 								sampling = Integer.parseInt(sample);
+								if (sampling>MAX_SAMPLING){
+									sampling = MAX_SAMPLING;
+								}
 							} catch (NumberFormatException e) {
 								sampling = 100;
 							}

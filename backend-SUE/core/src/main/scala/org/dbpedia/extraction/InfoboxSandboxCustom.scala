@@ -468,6 +468,69 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   }
 
+  def countInfoboxPropertiesFromSubjectsProperty(titles: Seq[String], property:String) = {
+
+    var infoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
+    val infoboxCount = new scala.collection.mutable.HashMap[String, Int]
+
+    // initialize infoboxKeys with 0s
+   /* for (wikiDML <- infoboxProperties) {
+      infoboxCount += (wikiDML.infobox + ":" + wikiDML.property -> 0) // this is what we need to count and return
+      if (!infoboxTitles.contains(wikiDML.infobox.toUpperCase))
+        infoboxTitles += wikiDML.infobox.toUpperCase
+    }*/
+
+    // println("Counting Infobox properties...")
+    for (title <- titles) {
+      //      println(title)
+
+      // get all properties from titles
+      val pathName = download_directory + "/" + title
+      val newPath: Path = Path.fromString(pathName)
+      newPath.createDirectory(failIfExists = false)
+
+      val url = "https://en.wikipedia.org/w/api.php?" +
+        "action=query&prop=revisions&format=xml&rvprop=ids|timestamp|userid|sha1|content&rvlimit=1&rvgeneratexml=&rvcontentformat=text%2Fx-wiki&rvstart=now&rvdir=older&exportnowrap=&titles=" + title // " + revision_limit + "
+
+      val extractLogic = new ExtractLogic
+
+      try {
+
+        if (!new File(download_directory + "/" + title + "/page.xml").exists()) {
+          val (revID, template) = extractLogic.downloadAndCreateTemplate2(pathName, title, url)
+        }
+
+        val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/page.xml"), Language.English).head
+
+        parser(page) match {
+          case Some(node) =>
+
+            val infoboxes = collectTemplates(node)
+           // val filteredInfoboxes = infoboxes.filter(x => infoboxTitles.contains(x.title.decoded.toUpperCase)) // filter infoboxes by subject
+            println(infoboxes.size)
+            for (infobox <- infoboxes) {
+              for (k <- infobox.keySet) {
+                for (p<- infobox.property(k)) {
+                 println(p.toWikiText)
+                  if (p.toWikiText.contains(property)) {
+                    infoboxCount(k) += 1
+                  }
+                }
+
+              }
+            }
+        }
+      }
+      catch {
+        case _: NoSuchElementException => println("Bad path name: " + pathName)
+        case _: XMLStreamException => println("XML page could not be read:" + pathName)
+      }
+    }
+
+    infoboxCount
+
+  }
+
   def countInfoboxProperties(titles: Seq[String], infoboxProperties: Seq[WikiDML]) = {
 
     var infoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
@@ -853,6 +916,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
           case None => Seq.empty
         }
       }
+
       wikiDML += subjwikiDML
 
     }
@@ -1483,60 +1547,61 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   }
 
-  def getStatResults(subject: String, predicate:String, sampleSize:Int) =
+  def getStatResultsAlternatives(subjectDbpedia: String, predicateDbpedia:String, sampleSize:Int,wikiAlternatives:Seq[Seq[WikiDML]]) =
   {
 
-      val subjType = getSubjectType(subject)
-      val rs = getQueryResultsFromDBpedia(subjType.toString)
+    val subjType = getSubjectType(subjectDbpedia)
+   // println(subjType)
+    val rs = getQueryResultsFromDBpedia(subjType.toString)
 
-      val resType = new ArrayBuffer[String]()
+    val resType = new ArrayBuffer[String]()
+
+    while (rs.hasNext()) {
+
+      val sol = rs.nextSolution.get("?Y").toString
+      // filter only those types from dbpedia ontology
+      if (sol.contains("http://dbpedia.org/ontology")) {
+        resType += sol
+      }
+    }
+
+    val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicateDbpedia, resType.toSeq)
+
+    val subjects = new ArrayBuffer[String]()
+
+    for (query <- queries) {
+      //println(query)
+      val rs = getQueryResultsFromDBpedia(query)
 
       while (rs.hasNext()) {
 
         val sol = rs.nextSolution.get("?Y").toString
-
-        resType += sol
+       // println("Solution: "+sol)
+        val title = sol.substring(sol.lastIndexOf("/") + 1)
+        if (!subjects.contains(title))
+          subjects += title
+        // download the pages
       }
+    }
 
-      val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicate, resType.toSeq)
-
-      val subjects = new ArrayBuffer[String]()
-
-      for (query <- queries) {
-
-        val rs = getQueryResultsFromDBpedia(query)
-
-        while (rs.hasNext()) {
-
-          val sol = rs.nextSolution.get("?Y").toString
-          //        println(sol)
-          val title = sol.substring(sol.lastIndexOf("/") + 1)
-          if (!subjects.contains(title))
-            subjects += title
-          // download the pages
-        }
-      }
-
-      //val wikiDMLs = resolveUpdate(update)
-
-      // flatten wikiDMLs
-      //val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
-
-      // TODO: fix this
-      //println(countInfoboxProperties(subjects, setWikiDML))
+    countInfoboxProperties(subjects, wikiAlternatives.flatten)
 
   }
 
+
+
+
   def getSubjectType(subject:String) = {
 
-    val res = ArrayBuffer[String]()
+   // val res = ArrayBuffer[String]()
 
     val dataset = "SELECT DISTINCT ?Y \n" +
       "WHERE { " + subject + " a ?Y  . }"
 
-    res += dataset
+    //res += dataset
 
-    res
+    //res
+    dataset
   }
 
   def getQueryForResourcesWithSamePredicates(limit: Int, predicate: String, classType: Seq[String]) = {
@@ -1553,7 +1618,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     for (cType <- classType)
     {
-      dataset +=  "?Y a " + cType + " . \n"
+      dataset +=  "?Y a <" + cType + "> . \n"
     }
 
     dataset += "?Y <" + predicate + "> ?Z2 . \n" +
@@ -2151,20 +2216,31 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     }
 
-  object TestNewStatistics {
 
-    def main(args: Array[String]): Unit =
-    {
 
+object TestNewStatisticsFromUI {
+
+  def main(args: Array[String]): Unit =
+  {
+
+    val subject = "<http://dbpedia.org/resource/Santi_Cazorla>" // change
+    val predicate = "http://xmlns.com/foaf/0.1/name" // change
+    val sample = 100  // change
+
+    //the update comes from the UI
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
     val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    var updateStr = "./data/updates/dbpedia01.ru"
+    val update = UpdateFactory.create(UtilFunctions.readFile(updateStr))
+    val wikiDMLs = test.resolveUpdate(update)
 
-    val subject = "" // change
-    val predicate = "" // change
-    val sample = 100  // change
+    // flatten wikiDMLs
+    val setWikiDML = wikiDMLs._1.toSeq.flatten
 
-    test.getStatResults(subject, predicate, sample)
+
+    // this is the call from the UI, i.e., subject in Dbpedia, Predicate in Dbpedia and wiki alternatives
+    println(test.getStatResultsAlternatives(subject,predicate,sample,setWikiDML))
 
   }
 

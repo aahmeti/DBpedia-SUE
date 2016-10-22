@@ -36,6 +36,8 @@ import scala.collection.mutable.ArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import at.tuwien.dbai.rewriter.Stopwatch;
+
 /**
  * Root resource (exposed at "myresource" path)
  */
@@ -59,7 +61,8 @@ public class ajaxquerySingleton {
 			@Context HttpServletResponse servletResponse) throws IOException {
 
 		
-		
+		Stopwatch watch = new Stopwatch();
+		watch.start();
 		String localPath = context.getRealPath(PATH_DOWNLOADS);
 		String localPathOntology = context.getRealPath(PATH_ONTOLOGY);
 		String localPathMappings = context.getRealPath(PATH_MAPPINGS);
@@ -398,7 +401,36 @@ public class ajaxquerySingleton {
 					}
 					tempRetOptions+="</div>"; //close tabsOptionsContent
 					
+					//<div id=\"chart_div\"></div>
 					
+					ret+="<div>See Stats";
+					ret+=" <script type=\"text/javascript\">\n"+
+					//ret+="<div id=\"stats\" style=\"display:none;\">"+
+					
+						//	"$.getScript(\"https://www.google.com/jsapi\", function () {\n"+
+							
+							"google.load('visualization', '1.0', {'packages':['corechart']});\n"+
+							"$(document).ready(function() {"+
+								"google.setOnLoadCallback(drawChart);\n"+
+								"function drawChart() {\n"+
+							       "var data = new google.visualization.DataTable();\n"+
+							        "data.addColumn('string', 'course');\n"+
+							        "data.addColumn('number', 'number of registered students');\n"+
+							        "data.addRows([['name',99],['playername',50],['fullname',30]]);\n"+
+							       " var options = {\n"+
+							                "legend: { position: 'none' },\n"+
+							                "vAxis: {title: 'Infobox Football biography', minValue: 0},\n"+
+							                " hAxis: {title: 'Coverage %'}\n"+
+					               	"};\n"+
+				        	
+				        			" var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));\n"+
+				        			"chart.draw(data, options);\n"+
+				        		"}\n"+
+				        	"});"+
+					// "</div> ";
+					"</script>";
+					ret+="</div>";
+		
 					/*
 					 * Write the name of the tabs
 					 */
@@ -484,7 +516,7 @@ public class ajaxquerySingleton {
 				 * "});\n";
 				 */
 			}
-
+	
 			ret += jscript;
 			ret += "});\n"
 			// ret+="</script>comon"
@@ -499,6 +531,9 @@ public class ajaxquerySingleton {
 			System.out.println("except:" + e);
 			e.printStackTrace(System.out);
 		}
+		
+		watch.stop();
+		System.out.println("Time:"+watch.getTime());
 
 		return ret;
 	}

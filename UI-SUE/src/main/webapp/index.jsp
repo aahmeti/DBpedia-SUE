@@ -147,6 +147,9 @@ br {
 /*]]>*/
 </style>
 
+
+      
+ 
 <!--  copy clipboard -->
 <script
 	src="js/copy.js"></script>
@@ -263,6 +266,8 @@ $(document).ready(function(){
 														//	$( "#tabsvertical" ).append($($.parseHTML(response)).filter("#js2"));
 															$( "#tabsverticalTriples" ).append($($.parseHTML(response)).filter("#js2"));
 															$('#js2').each(function (index, element) { eval(element.innerHTML); });
+														//	$('#stats').each(function (index, element) { alert(element.innerHTML); });
+														//	$('#stats').each(function (index, element) { eval(element.innerHTML); });
 															
 															addButtonConsistency();
 															clearTimeout(progressTimer);
@@ -487,6 +492,14 @@ $(document).ready(function(){
 	display: none;
 }
 </style>
+
+ <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+     <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('current', {'packages':['corechart']});
+      </script>
+      
 </head>
 <body>
 	<div id="header">
@@ -755,6 +768,24 @@ WHERE{}
 		</div>
 
 	</div>
+	<div>See Stats<div id="chart_div"></div></div>
+	<script type="text/javascript">
+//google.load('visualization', '1.0', {'packages':['corechart']});
+$(document).ready(function() {google.setOnLoadCallback(drawChart);
+function drawChart() {
+var data = new google.visualization.DataTable();
+data.addColumn('string', 'course');
+data.addColumn('number', 'number of registered students');
+data.addRows([['name',99],['playername',50],['fullname',30]]);
+ var options = {
+legend: { position: 'none' },
+vAxis: {title: 'Infobox Football biography', minValue: 0},
+ hAxis: {title: 'Coverage %'}
+};
+ var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+chart.draw(data, options);
+}
+});</script>
 	<div id="footer">
 		<p>
 			The DBpedia SUE is an Open service hosted by the <a

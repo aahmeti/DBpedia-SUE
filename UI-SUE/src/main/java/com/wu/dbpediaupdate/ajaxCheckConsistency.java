@@ -55,6 +55,7 @@ public class ajaxCheckConsistency {
 			@FormParam("postvar[]") List<String> vars,
 			@Context HttpServletRequest req,
 			@Context HttpServletResponse servletResponse) throws IOException {
+		 System.out.println("our vars");
 		 System.out.println(vars);
 
 		// retrieve dmls
@@ -96,15 +97,16 @@ public class ajaxCheckConsistency {
 		String localPathOntology = context.getRealPath(PATH_ONTOLOGY);
 		String localPathMappings = context.getRealPath(PATH_MAPPINGS);
 		
-		InfoboxSandboxCustom info = new InfoboxSandboxCustom(null,
-				"_ambig.xml",null,null,null); // this
+		InfoboxSandboxCustom info = Init.getInfoboxSandboxCustom(); 
+				//new InfoboxSandboxCustom(null,
+				//"_ambig.xml",null,null,null); // this
 								// worked
-
+//info.setConfiguration(localPath, localPathOntology,
+		//localPathMappings);
+//System.out.println("wel set config"); // inserts
 		// for
 		System.out.println("well created! new InfoboxSandboxCustom"); // inserts
-		info.setConfiguration(localPath, localPathOntology,
-				localPathMappings);
-		System.out.println("wel set config"); // inserts
+		
 
 		Boolean ret=false;
 		try{

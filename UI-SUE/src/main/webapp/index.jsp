@@ -566,13 +566,20 @@ WHERE{}
 				<br>
 				<!--  <span class="info"><i>(Security restrictions of this server do not allow you to retrieve remote RDF data, see <a href="http://dbpedia.org/sparql?help=enable_sponge">details</a>.)</i></span>
 		<br>-->
-				<label for="format" class="n">Choose Semantics</label> <select
+				
+				<br>
+				
+				<h4>- Choose Semantics <select
 					name="format" id="format" onchange="format_change(this)">
 					<option value="auto">Auto</option>
 					<option value="brave" selected="selected">Brave</option>
 					<option value="cautious">Cautious</option>
 					<option value="fainthearted">Fainthearted</option>
 				</select> 
+				</h4>
+					<h4 style="border:10px;">- <input type="checkbox" name="stats" value="true"/> Compute statistics of similar subjects (wait a few seconds more). Sample: <input type="number" name="sample" value="50" min="1" max="300" /></h4>
+				
+				
 				<!--  <br></br> <label class="n" for="options">Options</label>
 				<fieldset id="options">
 					<input name="debug" id="debug" type="checkbox" checked="checked"></input>
@@ -768,24 +775,8 @@ WHERE{}
 		</div>
 
 	</div>
-	<div>See Stats<div id="chart_div"></div></div>
-	<script type="text/javascript">
-//google.load('visualization', '1.0', {'packages':['corechart']});
-$(document).ready(function() {google.setOnLoadCallback(drawChart);
-function drawChart() {
-var data = new google.visualization.DataTable();
-data.addColumn('string', 'course');
-data.addColumn('number', 'number of registered students');
-data.addRows([['name',99],['playername',50],['fullname',30]]);
- var options = {
-legend: { position: 'none' },
-vAxis: {title: 'Infobox Football biography', minValue: 0},
- hAxis: {title: 'Coverage %'}
-};
- var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-chart.draw(data, options);
-}
-});</script>
+	
+	
 	<div id="footer">
 		<p>
 			The DBpedia SUE is an Open service hosted by the <a

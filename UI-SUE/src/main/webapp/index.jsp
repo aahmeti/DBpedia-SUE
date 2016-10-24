@@ -312,38 +312,47 @@ $(document).ready(function(){
 					//	alert($("#"+$(this).val()).html());
 					  data.push($("#"+$(this).val()).html());
 					});
-        			// alert(data);
+        			 //alert(data);
         	
-        	var dataobject = {
-		            postvar: data
-		        } ;
-        
-        		var test="pp";
-        		var req =  $.ajax({ // create an AJAX call...
-							//	data :data,
-							data:dataobject,
-								type : "POST", // GET or POST
-								url : "webapi/ajaxcheckconsistency",  
-								 
-								success : function(
-										response) { // on success..
-								
-								 //alert(response);
-								alert("This update is consistent!");
-								//	alert('ok! '+ status);
-									
-								},
-								error : function(xhr,
-										status) {
-									if (status !='abort') {
-										alert('Error! '
-											+ status);
-									}
-									
-									
-								}
-							});
-				return false; // cancel original event to prevent form submitting	
+        		if (data.length>0){
+		        	$("#resultConsistency").html("<img src=\"img/Loading_icon.gif\" height=\"75px;\">");
+		        	
+		        	var dataobject = {
+				            postvar: data
+				        } ;
+		        
+		        		var test="pp";
+		        		var req =  $.ajax({ // create an AJAX call...
+									//	data :data,
+									data:dataobject,
+										type : "POST", // GET or POST
+										url : "webapi/ajaxcheckconsistency",  
+										 
+										success : function(
+												response) { // on success..
+										
+										 //alert(response);
+										 $("#resultConsistency").html("<span style=\"background-color:lightgreen;\">This update is consistent!</span>");
+										//alert("This update is consistent!");
+										//	alert('ok! '+ status);
+											
+										},
+										error : function(xhr,
+												status) {
+											if (status !='abort') {
+												//alert('Error! '+ status);
+													 $("#resultConsistency").html("<span style=\"background-color:red;\">This update is NOT consistent!</span>");
+											}
+											
+											
+										}
+									});
+						return false; // cancel original event to prevent form submitting					
+				}
+				else{
+				$("#resultConsistency").html("<span style=\"background-color:orange;\">Please chek at least one update!</span>");
+				}
+				
 				});	
         		
         		

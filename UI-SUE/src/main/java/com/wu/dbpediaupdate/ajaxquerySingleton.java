@@ -552,7 +552,7 @@ public class ajaxquerySingleton {
 			/*
 			 * END OF ITERATION TRIPLES
 			 */
-			ret += "<div style=\"text-align:right\"><button id=\"checkconsistency\">Check consitency of selected results</button></div>";
+			ret += "<div style=\"text-align:right\"><button id=\"checkconsistency\">Check consitency of selected results</button><div id=\"resultConsistency\" style=\"margin-top:10px\"></div></div>";
 
 			ret += "</div>"; // close alternativesTriples
 			/*

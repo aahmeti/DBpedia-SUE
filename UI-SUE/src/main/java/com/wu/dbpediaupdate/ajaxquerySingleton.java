@@ -327,7 +327,12 @@ public class ajaxquerySingleton {
 								+ (i + 1)
 								+ "\" style=\"text-align:right\"> Mark to check consistency <input type=\"checkbox\" name=\"wikidml\" value=\"wikiDMLs-"
 								+ (i + 1)
-								+ "\"><div style=\"display:none\" id=\"wikiDMLs-"
+								+ "\"";
+						if (numoption==1){
+							tempRetOptions+=" checked";
+						}
+						
+						tempRetOptions+="><div style=\"display:none\" id=\"wikiDMLs-"
 								+ (i + 1) + "\">" + exportDMLs + "</div></div>";
 						/*
 						 * UPDATE SCRIPT

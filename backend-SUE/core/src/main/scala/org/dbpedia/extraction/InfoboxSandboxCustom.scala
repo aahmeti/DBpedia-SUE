@@ -1,6 +1,7 @@
 package org.dbpedia.extraction
 
 import java.io._
+import java.nio.charset.StandardCharsets
 import java.util
 import java.util.NoSuchElementException
 import javax.swing._
@@ -1183,35 +1184,26 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       val t = new TerseFormatter(false, true)
       val extractLogic = new ExtractLogic
 
-      val pathname = download_directory + "/" + "context.ttl"
-      val file = new File(pathname);
-      file.delete()
-
-      for (quad <- result) {
-        extractLogic.printToFile2(pathname, t.render(quad))
-      }
-
       val dbpediaPath = download_directory + "/" + "dbpedia_2014.owl"
 
-      val dataset = TDBFactory.createDataset(download_directory + "/" + "TDB")
+      val dataset = TDBFactory.createDataset()
       dataset.begin(ReadWrite.WRITE)
       val model = dataset.getDefaultModel()
       val ts = new TripleStore(model)
-      ts.setDataset(dataset)
 
-      ts.clear()
-      ts.init(pathname, "N3")
       ts.init(dbpediaPath, "RDF/XML")
+
+      val sb = new StringBuilder()
+
+      for (quad <- result) {
+         sb.append( t.render(quad) )
+      }
+
+      model.read( new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), null, "N3" )
 
       ts.materializeDBpedia()
 
-      val ts2 = new TripleStore(download_directory + "/" + "TDB", true)
-      //  var dsRead = ts2.getDataset();
-      // ts2.getDataset().begin(ReadWrite.READ);
-
-      //  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-      //  Check for class disjoints inconsistency
-      //  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      ts.setDataset(dataset)
 
       val queryConsistencyCheck =
         "SELECT ?subject \n" +
@@ -1224,17 +1216,17 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
           "?predicate <http://www.w3.org/2002/07/owl#propertyDisjointWith> ?predicate2 }} "
 
       // todo: return the inconsistent triple
-      val rs = ts2.getResultsFromQuery(queryConsistencyCheck);
+      val rs = ts.getResultsFromQuery(queryConsistencyCheck);
 
       if (rs.hasNext) {
         while (rs.hasNext()) {
           rs.next()
         }
-        ts2.getDataset().end()
+        ts.getDataset().end()
 
         bConsistent = false
       }
-      ts2.getDataset().end()
+      ts.getDataset().end()
     }
     bConsistent
   }

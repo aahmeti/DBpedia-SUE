@@ -21,6 +21,10 @@ import org.dbpedia.extraction.util.Language
 import org.dbpedia.extraction.wikiparser._
 import wikiPropertiesRecommendation.WikiTemplateManager
 
+import scala.collection.JavaConverters._
+import scala.collection.immutable.Stream.Empty
+import scala.io.Source
+
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, HashMap, MultiMap, Set}
 import scalax.file.Path
@@ -546,7 +550,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
    // println("Counting Infobox properties...")
     for (title <- titles) {
-//      println(title)
+      println(title)
 
       // get all properties from titles
       val pathName = download_directory + "/" + title
@@ -584,6 +588,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       catch {
         case _: NoSuchElementException => println("Bad path name: " + pathName)
         case _: XMLStreamException => println("XML page could not be read:" + pathName)
+        case _: IllegalArgumentException => println("IllegalArgumentException!:" + pathName)
       }
     }
 
@@ -783,7 +788,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               val tPredicate = triple.getPredicate.toString
               val tObject = triple.getObject.toString
 
-              println("For each templateMapping")
+             // println("For each templateMapping")
               // for (templateMapping <- contextMappings.mappings.templateMappings) {
               for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
               )
@@ -1559,6 +1564,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
     val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicateDbpedia, resType.toSeq)
 
+    println(queries)
     val subjects = new ArrayBuffer[String]()
 
     for (query <- queries) {
@@ -1614,7 +1620,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     }
 
     dataset += "?Y <" + predicate + "> ?Z2 . \n" +
-            "} LIMIT " + limit
+            "} ORDER BY RAND() LIMIT " + limit
 
     res += dataset
 
@@ -1635,10 +1641,28 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       "} LIMIT " + limit
     res += dataset
 
+    println(dataset)
 
     res
   }
 
+  def AskQueryFromDBpedia(queryStr: String):Boolean =
+  {
+    var res=false
+    val query = QueryFactory.create(queryStr)
+
+    val qexec: QueryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql", query)
+
+    try {
+      res = qexec.execAsk()
+    }
+    finally {
+      //qexec.close()
+    }
+
+    res
+
+  }
   def getQueryResultsFromDBpedia(queryStr: String) =
   {
     var res: ResultSet = null
@@ -1786,6 +1810,29 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     res
 
   }
+
+  def subjectandPredicateExists(triple:String):Boolean={
+
+    var positionFirstspace=triple.indexOf(" ")
+    var positionSecondspace=triple.indexOf(" ",positionFirstspace+1)
+    var subjPredTriple = triple.substring(0,positionSecondspace)+" ?object"
+    val query = "ASK { " + subjPredTriple + "}"
+    //println(query)
+    val rs = AskQueryFromDBpedia(query)
+    //println(rs)
+    return rs
+
+  }
+  def tripleExists(triple:String):Boolean={
+
+    val query = "ASK { " + triple + "}"
+    val rs = AskQueryFromDBpedia(query)
+    return rs
+
+  }
+
+
+
 }
 
     object TestGroundTriplesFromUpdate {
@@ -2215,15 +2262,19 @@ object TestNewStatisticsFromUI {
   def main(args: Array[String]): Unit =
   {
 
-    val subject = "<http://dbpedia.org/resource/Santi_Cazorla>" // change
-    val predicate = "http://xmlns.com/foaf/0.1/name" // change
+    val subject = "<http://dbpedia.org/resource/Walt_Disney>" // change
+    //val predicate = "http://dbpedia.org/ontology/birthDate" // change
+  //val predicate = "http://dbpedia.org/ontology/team" // change
+  val predicate = "http://xmlns.com/foaf/0.1/homepage" // change
     val sample = 100  // change
 
     //the update comes from the UI
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
     val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
-    var updateStr = "./data/updates/dbpedia01.ru"
+    var updateStr = "./data/updates/changeInfoboxPerson.ru"
+    //var updateStr = "./data/updates/dbpedia01.ru"
+    //var updateStr = "./data/updates/changeTaxobox.ru"
     val update = UpdateFactory.create(UtilFunctions.readFile(updateStr))
     val wikiDMLs = test.resolveUpdate(update)
 
@@ -2304,6 +2355,118 @@ object TestNewStatisticsFromUI {
 
     }
 
+object TestBulkAdded {
+
+  def main(args: Array[String]): Unit = {
+
+    //  Start with no infobox and general mapping (no prefix)
+    val testDataRootDir = null
+    val mappingFileSuffix = ".xml"
+    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+
+
+    val filewithInserts = "./data/updates/added.nt"
+
+    var countExistingTriples=0
+    var countMissingTriples=0
+    var countresolvedWikiDMLupdates=0
+    var countresolvedUNIQWikiDMLupdates=0
+    var countresolvedNOTUNIQWikiDMLupdates=0
+    var countresolvedalternativeAccommodationsWikiDMLupdates=0
+    var countNOTresolvedWikiDMLupdate=0
+    var countexceptions=0
+    var countTypeInsert=0;
+    var countTypeMissing=0;
+    var countTypeExistingTriples=0
+    var countTypeInsertResolved=0;
+    var countTypeInsertNOTResolved=0;
+    var total=0
+    for(line <- Source.fromFile(filewithInserts).getLines()){
+      total+=1
+      println("\n"+total+".======================================")
+      //1.- CHECK THAT THE TRIPLE IS INDEED IN DBPEDIA (OTHERWISE IT MIGHT CAME FROM OTHER SOURCES OR BEING A TRANSITION)
+
+       var exists = test.tripleExists(line)
+      // UNCOMMENT THE FOLLOWING TO RELAX THE CONDITION AND JUST CHECK THAT THE SUBJECT AND PREDICATE ARE PRESENT
+      //var exists = test.subjectandPredicateExists(line)
+      //2. COUNT IF THE TRIPLE IS INSERTING A TYPE (IT'S MORE DIFFICULT)
+      var isType = false
+      if (line.contains("22-rdf-syntax-ns#type")){
+        countTypeInsert+=1
+        isType=true
+      }
+
+      if (!exists){
+        countMissingTriples+=1
+        println("---- Missing Triple in Dbpedia: "+line)
+        if (isType)
+          countTypeMissing+=1
+      }
+      else{
+        countExistingTriples+=1
+        if (isType)
+          countTypeExistingTriples+=1
+        val atomicUpdate = "INSERT{ "+line+"} WHERE{}";
+        println("++++++ Resolving Insert: "+line)
+        //println("resolveupdate!")
+       try{
+         var result = test.updateFromUpdateQuery(atomicUpdate)
+         println("count: "+result._1(0).size)
+         if (result._1(0).size>0) {
+           countresolvedWikiDMLupdates += 1
+           if (isType)
+             countTypeInsertResolved+=1
+           if (result._1(0).size==1){
+             countresolvedUNIQWikiDMLupdates+=1
+           }
+           else{
+             countresolvedNOTUNIQWikiDMLupdates+=1
+             countresolvedalternativeAccommodationsWikiDMLupdates+=result._1(0).size
+           }
+         }
+         else {
+           countNOTresolvedWikiDMLupdate += 1
+           if (isType)
+             countTypeInsertNOTResolved+=1
+         }
+         println(result)
+       }
+       catch {
+         case _: NoSuchElementException => {
+           println("__NoSuchElementException")
+           countNOTresolvedWikiDMLupdate+=1
+           countexceptions+=1
+         }
+       }
+
+      }
+      println("======================================")
+
+    }
+
+    println("\n\n FINAK STATS ======================================")
+    println("- total Triples: "+total)
+    println("  - triples NOT in Dbpedia: "+countMissingTriples)
+    println("  - triples in Dbpedia (processed): "+countExistingTriples)
+    println("      - insertion resolved: "+countresolvedWikiDMLupdates)
+    println("           - UNIQ accomodations: "+countresolvedUNIQWikiDMLupdates)
+    println("           - NOT UNIQ accomodations: "+countresolvedNOTUNIQWikiDMLupdates)
+    if (countresolvedNOTUNIQWikiDMLupdates!=0)
+      println("               - average number of alternative accomodations: "+countresolvedalternativeAccommodationsWikiDMLupdates/countresolvedNOTUNIQWikiDMLupdates)
+    println("      - insertion NOT resolved: "+countNOTresolvedWikiDMLupdate)
+    println("           - Exceptions: "+countexceptions)
+    println("----------------------")
+    println("  - TYPE Triples: "+countTypeInsert)
+    println("      - TYPE triples NOT in Dbpedia: "+countTypeMissing)
+    println("      - TYPE triples in Dbpedia (processed): "+countTypeExistingTriples)
+    println("           - TYPE triples resolved: "+countTypeInsertResolved)
+    println("           - TYPE triples NOT resolved: "+countTypeInsertNOTResolved)
+
+
+  }
+
+}
+
     object TestUpdate {
 
       def main(args: Array[String]): Unit = {
@@ -2314,7 +2477,7 @@ object TestNewStatisticsFromUI {
         val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
 
         //  Instantiate General update to DBpedia and Group it by Subject
-        val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
+        val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia05.ru"))
         val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
 
         var atomicUpdate: UpdateRequest = null

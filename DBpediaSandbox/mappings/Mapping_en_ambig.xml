@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/">
+<page><title>Mapping en:Infobox football biography</title><ns>204</ns><id>98</id><revision><id>31913</id><timestamp>2014-02-14T17:53:31Z</timestamp><text>{{ConditionalMapping
+| cases =
+	{{Condition
+	| templateProperty = managerYears
+	| operator = isSet
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerManager }}
+	}}
+	{{Condition
+	| operator = otherwise
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerPlayer }}
+	}}
+
+| defaultMappings =
+	{{PropertyMapping | templateProperty = name | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = playername | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = managerYears | ontologyProperty = team }}
+}}</text></revision></page>
+
+</mediawiki>

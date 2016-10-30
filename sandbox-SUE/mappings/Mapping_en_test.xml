@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?><mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/">
+<page><title>Mapping en:Infobox football biography</title><ns>204</ns><id>98</id><revision><id>31913</id><timestamp>2014-02-14T17:53:31Z</timestamp><text>{{ConditionalMapping
+| cases =
+	{{Condition
+	| templateProperty = manageryears
+	| operator = isSet
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerManager }}
+	}}
+	{{Condition
+	| templateProperty = manageryears1
+	| operator = isSet
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerManager }}
+	}}
+	{{Condition
+	| templateProperty = managerclubs
+	| operator = isSet
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerManager }}
+	}}
+	{{Condition
+	| templateProperty = managerclubs1
+	| operator = isSet
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerManager }}
+	}}
+	{{Condition
+	| operator = otherwise
+	| mapping = {{TemplateMapping | header = 0 | mapToClass = SoccerPlayer }}
+	}}
+
+| defaultMappings =
+	{{PropertyMapping | templateProperty = name | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = playername | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = playername | ontologyProperty = commonName }}
+	{{PropertyMapping | templateProperty = fullname | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = image | ontologyProperty = picture }}
+	{{PropertyMapping | templateProperty = dateofbirth | ontologyProperty = birthDate }}
+	{{PropertyMapping | templateProperty = birth_date | ontologyProperty = birthDate }}
+	{{PropertyMapping | templateProperty = cityofbirth | ontologyProperty = birthPlace }}
+	{{PropertyMapping | templateProperty = countryofbirth | ontologyProperty = birthPlace }}
+	{{PropertyMapping | templateProperty = birth_place | ontologyProperty = birthPlace }}
+	{{PropertyMapping | templateProperty = dateofdeath | ontologyProperty = deathDate }}
+	{{PropertyMapping | templateProperty = death_date | ontologyProperty = deathDate }}
+	{{PropertyMapping | templateProperty = cityofdeath | ontologyProperty = deathPlace }}
+	{{PropertyMapping | templateProperty = countryofdeath | ontologyProperty = deathPlace }}
+	{{PropertyMapping | templateProperty = death_place | ontologyProperty = deathPlace }}
+	{{PropertyMapping | templateProperty = currentclub | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubnumber | ontologyProperty = number }}
+	{{PropertyMapping | templateProperty = height | ontologyProperty = height | unit = Length}}
+	{{PropertyMapping | templateProperty = position | ontologyProperty = position }}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = youthclubs | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = youthyears | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = youthclubs1 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = youthyears1 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = youthclubs2 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = youthyears2 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = youthclubs3 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = youthyears3 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs1 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years1 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps1 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals1 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs2 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years2 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps2 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals2 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs3 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years3 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps3 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals3 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs4 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years4 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps4 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals4 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs5 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years5 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps5 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals5 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs6 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years6 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps6 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals6 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs7 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years7 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps7 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals7 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs8 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years8 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps8 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals8 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs9 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years9 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps9 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals9 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs10 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years10 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps10 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals10 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs11 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years11 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps11 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals11 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs12 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years12 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps12 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals12 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs13 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years13 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps13 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals13 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs14 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years14 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps14 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals14 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = clubs15 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = years15 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = caps15 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = goals15 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = nationalteam | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = nationalyears | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = nationalcaps | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = nationalgoals | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = nationalteam1 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = nationalyears1 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = nationalcaps1 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = nationalgoals1 | ontologyProperty = numberOfGoals }}
+	}}	
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = nationalteam2 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = nationalyears2 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = nationalcaps2 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = nationalgoals2 | ontologyProperty = numberOfGoals }}
+	}}	
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = nationalteam3 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = nationalyears3 | ontologyProperty = years }}
+	  {{PropertyMapping | templateProperty = nationalcaps3 | ontologyProperty = numberOfMatches}}
+	  {{PropertyMapping | templateProperty = nationalgoals3 | ontologyProperty = numberOfGoals }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs1 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears1 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs2 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears2 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs3 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears3 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs4 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears4 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs5 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears5 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs6 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears6 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs7 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears7 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs8 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears8 | ontologyProperty = years }}
+	}}
+	{{IntermediateNodeMapping | nodeClass = CareerStation | correspondingProperty = careerStation | mappings = 
+	  {{PropertyMapping | templateProperty = managerclubs9 | ontologyProperty = team }}
+	  {{PropertyMapping | templateProperty = manageryears9 | ontologyProperty = years }}
+	}}
+	{{PropertyMapping | templateProperty = youthclubs | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = youthclubs1 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = youthclubs2 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = youthclubs3 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs1 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs2 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs3 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs4 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs5 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs6 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs7 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs8 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs9 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = clubs10 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = nationalteam | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = nationalteam1 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = nationalteam2 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = nationalteam3 | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = managerclubs | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs1 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs2 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs3 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs4 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs5 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs6 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs7 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs8 | ontologyProperty = managerClub }}
+	{{PropertyMapping | templateProperty = managerclubs9 | ontologyProperty = managerClub }}
+
+	{{DateIntervalMapping
+	| templateProperty          = years1
+	| startDateOntologyProperty = activeYearsStartYear
+	| endDateOntologyProperty   = activeYearsEndYear
+	}}
+	
+&lt;!--
+	Needs to been changed into Intermediate Nodes
+	{{PropertyMapping | templateProperty = caps(goals) | ontologyProperty = team }}
+	{{PropertyMapping | templateProperty = nationalcaps(goals) | ontologyProperty = team }}
+	{{DateIntervalMapping
+	| templateProperty          = youthyears
+	| startDateOntologyProperty = activeYearsStartYear
+	| endDateOntologyProperty   = activeYearsEndYear
+	}}
+	{{DateIntervalMapping
+	| templateProperty          = years
+	| startDateOntologyProperty = activeYearsStartYear
+	| endDateOntologyProperty   = activeYearsEndYear
+	}}
+	{{DateIntervalMapping
+	| templateProperty          = nationalyears
+	| startDateOntologyProperty = activeYearsStartYear
+	| endDateOntologyProperty   = activeYearsEndYear
+	}}
+--&gt;
+}}</text></revision></page>
+
+	<page><title>Mapping en:Infobox NBA biography</title><ns>204</ns><id>7957</id><revision><id>27923</id><timestamp>2013-07-19T09:29:49Z</timestamp><text>{{TemplateMapping
+		| mapToClass = BasketballPlayer
+		| mappings =
+		{{PropertyMapping | templateProperty = league | ontologyProperty = league }}
+		{{PropertyMapping | templateProperty = number | ontologyProperty = number }}
+		{{PropertyMapping | templateProperty = highschool | ontologyProperty = highschool }}
+		{{PropertyMapping | templateProperty = college | ontologyProperty = college }}
+		{{PropertyMapping | templateProperty = draft | ontologyProperty = draft }}
+		{{PropertyMapping | templateProperty = draft_year | ontologyProperty = draftYear }}
+		{{PropertyMapping | templateProperty = draft_team | ontologyProperty = draftTeam }}
+		{{PropertyMapping | templateProperty = name | ontologyProperty = foaf:name }}
+		{{PropertyMapping | templateProperty = position | ontologyProperty = position }}
+		{{PropertyMapping | templateProperty = weight_lb | ontologyProperty = weight | unit = pound }}
+		{{PropertyMapping | templateProperty = weight_lbs | ontologyProperty = weight | unit = pound }}
+		{{PropertyMapping | templateProperty = weight | ontologyProperty = weight | unit = pound }}
+		{{PropertyMapping | templateProperty = weight_kg | ontologyProperty = weight | unit = kilogram }}
+		{{PropertyMapping | templateProperty = team | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = birth_date | ontologyProperty = birthDate }}
+		{{PropertyMapping | templateProperty = birth_place | ontologyProperty = birthPlace }}
+		{{PropertyMapping | templateProperty = nationality | ontologyProperty = nationality }}
+		{{PropertyMapping | templateProperty = career_start | ontologyProperty = activeYearsStartYear }}
+		{{PropertyMapping | templateProperty = career_end | ontologyProperty = activeYearsEndYear }}
+		{{PropertyMapping | templateProperty = former_teams | ontologyProperty = formerTeam }}
+		{{PropertyMapping | templateProperty = awards | ontologyProperty = award }}
+		{{PropertyMapping | templateProperty = height | ontologyProperty = height | unit = foot }}
+		{{PropertyMapping | templateProperty = height_m | ontologyProperty = height | unit = metre }}
+		{{CalculateMapping | operation = add | templateProperty1 = height_ft  | unit1 = foot  | templateProperty2 = height_in  | unit2 = inch  | ontologyProperty = height }}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team1 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years1 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years1
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team2 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years2 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years2
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team3 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years3 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years3
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team4 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years4 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years4
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team5 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years5 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years5
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team6 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years6 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years6
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team7 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years7 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years7
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team8 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years8 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years8
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team9 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years9 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years9
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+
+		{{IntermediateNodeMapping
+		| nodeClass = TimePeriod
+		| correspondingProperty = termPeriod
+		| nodeURI = /{superResource}/StartEndDate/{number}
+		| mappings =
+		{{PropertyMapping | templateProperty = team10 | ontologyProperty = team }}
+		{{PropertyMapping | templateProperty = years10 | ontologyProperty = activeYearsStartYear }}
+		{{DateIntervalMapping
+		| templateProperty          = years10
+		| startDateOntologyProperty = activeYearsStartYear
+		| endDateOntologyProperty   = activeYearsEndYear
+		}}
+		}}
+		}}</text></revision></page>
+
+	<page><title>Mapping en:Infobox aircraft begin</title><ns>204</ns><id>6330</id><revision><id>22076</id><timestamp>2013-01-09T21:04:43Z</timestamp><text>{{TemplateMapping
+		| mapToClass = Aircraft
+		| mappings =
+		{{PropertyMapping | templateProperty = name | ontologyProperty = foaf:name }}
+		}}</text></revision></page><page><title>Mapping en:Infobox aircraft type</title><ns>204</ns><id>19</id><revision><id>14149</id><timestamp>2011-07-15T12:55:49Z</timestamp><text>{{TemplateMapping
+	| mapToClass = Aircraft
+	| mappings =
+	{{PropertyMapping | templateProperty = type | ontologyProperty = type }}
+	{{PropertyMapping | templateProperty = national origin | ontologyProperty = origin }}
+
+	{{DateIntervalMapping | templateProperty = produced |
+	startDateOntologyProperty = productionStartDate|
+	endDateOntologyProperty = productionEndDate}}
+
+	{{DateIntervalMapping | templateProperty = produced |
+	startDateOntologyProperty = productionStartYear|
+	endDateOntologyProperty = productionEndYear}}
+
+	{{PropertyMapping | templateProperty = number built | ontologyProperty = numberBuilt }}
+	{{PropertyMapping | templateProperty = program cost | ontologyProperty = programCost | unit = Currency }}
+	{{PropertyMapping | templateProperty = unit cost | ontologyProperty = unitCost | unit = Currency }}
+	{{PropertyMapping | templateProperty = name | ontologyProperty = foaf:name }}
+	{{PropertyMapping | templateProperty = manufacturer | ontologyProperty = manufacturer }}
+	{{PropertyMapping | templateProperty = introduction | ontologyProperty = introductionDate }}
+	{{PropertyMapping | templateProperty = retired | ontologyProperty = retired }}
+	{{PropertyMapping | templateProperty = developed from | ontologyProperty = predecessor }}
+	{{PropertyMapping | templateProperty = variants with their own articles | ontologyProperty = successor }}
+	{{PropertyMapping | templateProperty = designer | ontologyProperty = designer }}
+	}}</text></revision></page>
+
+</mediawiki>

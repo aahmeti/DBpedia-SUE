@@ -195,43 +195,39 @@
 	 </dependency>	
 	 
 	 <dependency>
-              <groupId>org.wikidata.wdtk</groupId>
-              <artifactId>wdtk-datamodel</artifactId>
-              <version>0.4.0</version>
-         </dependency>
+          <groupId>org.wikidata.wdtk</groupId>
+          <artifactId>wdtk-datamodel</artifactId>
+          <version>0.4.0</version>
+     </dependency>
 
 
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-        </dependency>
+    <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-xml</artifactId>
-        </dependency>
+    <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-xml</artifactId>
+    </dependency>
 
-       <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-            <version>2.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>sparql-update</groupId>
-            <artifactId>updaterewriter</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-tdb</artifactId>
-            <version>1.1.2</version>
-        </dependency>
+   <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.5.0</version>
+   </dependency>
+   <!--dependency>
+        <groupId>org.apache.jena</groupId>
+        <artifactId>jena-arq</artifactId>
+        <version>2.13.0</version>
+   </dependency-->
+
+    <!--dependency>
+        <groupId>sparql-update</groupId>
+        <artifactId>updaterewriter</artifactId>
+        <version>0.0.1</version>
+    </dependency-->
+
     </dependencies>
-
 </project>
 

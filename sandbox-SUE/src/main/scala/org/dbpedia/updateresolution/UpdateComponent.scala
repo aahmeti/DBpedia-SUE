@@ -1,4 +1,4 @@
-package org.dbpedia.extraction
+package org.dbpedia.updateresolution
 
 /**
   * Created by Vadim on 09.11.2016.

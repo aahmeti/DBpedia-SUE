@@ -1,4 +1,4 @@
-package org.dbpedia.extraction
+package org.dbpedia.updateresolution
 
 import org.dbpedia.extraction.destinations.Quad
 
@@ -24,8 +24,6 @@ class ResolutionPattern (
     val oldValue: String=null,
     val newValue: String=null,
     val operation: String) {
-
-
 
   override def toString(): String = {
     if (operation == "UPDATE")

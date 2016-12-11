@@ -12,6 +12,8 @@ class ResolutionPattern (
     var rdfDelete: Seq[Quad],  // deleted dbpedia triples
     var rdfInsert: Seq[Quad], // inserted dbpedia triples using variable
 
+    val infobox: String, // The affected infobox
+
     // relevant Input Quad + precondition + Axiom? => induced ResPattern
 
     //e.g. Axiom would be "Infobox Key Constraint"

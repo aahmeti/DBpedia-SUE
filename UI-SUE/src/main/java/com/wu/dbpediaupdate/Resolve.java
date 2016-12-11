@@ -152,14 +152,15 @@ public class Resolve {
 
 
 
-			Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>, scala.collection.mutable.ArrayBuffer<String>> update = info
+
+			Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String,scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>>, scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String,scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>>> update = info
 					.updateFromUpdateQuery(query);
 			String jscript = "";
 
 			
-			scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>> testSeveralPages = update._1;
-
-			scala.collection.mutable.ArrayBuffer<String> titles = update._2;
+			// FIXME BAd, redo
+			scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>> testSeveralPages= new scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>();
+			scala.collection.mutable.ArrayBuffer<String> titles = new scala.collection.mutable.ArrayBuffer<String>();
 
 			int w = 0;
 

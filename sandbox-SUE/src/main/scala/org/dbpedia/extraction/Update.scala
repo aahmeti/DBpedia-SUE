@@ -10,7 +10,7 @@ class Update (
    instantiation: Map[String, Value]
 )
 {
-  def getConcreteQuads( component : UpdateComponent ): Seq[Quad]{
+  /*def getConcreteQuads( component : UpdateComponent ): Seq[Quad]{
       val ret : Seq[Quad] =
       component match {
         case UpdateComponent.WikiInsert => pattern.wikiInsert
@@ -22,5 +22,6 @@ class Update (
   }
 
   def apply(Quad : )
+*/
 }
 

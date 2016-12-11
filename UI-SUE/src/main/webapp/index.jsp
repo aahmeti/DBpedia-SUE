@@ -239,7 +239,7 @@ $(document).ready(function(){
 														// $( "#tabsvertical" ).append($($.parseHTML(response)).filter("#alternativesDML"));
 												///		$('#tabscontent').html($($.parseHTML(response)).filter("#alternativesDML"));
 														
-														$('#tabscontentTriples').html($($.parseHTML(response)).filter("#alternativesTriples"));
+														$('#tabscontentTriples').html($($.parseHTML(response)).filter("#alternativesSubjects"));
 														
 												///		 $( "#tabsvertical" ).tabs();
 												///		  $( "#tabsvertical li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
@@ -451,11 +451,11 @@ $(document).ready(function(){
 }
 
 .ui-tabs-vertical {
-	width: 65em;
+	width: 70em;
 }
 
 .ui-tabs-verticalsmall{
-	width: 58em;
+	width: 53em;
 }
 
 .ui-tabs-vertical .ui-tabs-nav {

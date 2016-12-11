@@ -10,9 +10,9 @@ public class WikiTemplate {
 	public int count;
 	public int numProperties;
 	public String name;
-	public TreeMap<String,Integer> properties;
-	
-	public WikiTemplate(){
+	public TreeMap<String, Integer> properties;
+
+	public WikiTemplate() {
 		properties = new TreeMap<>();
 	}
 
@@ -47,41 +47,46 @@ public class WikiTemplate {
 	public void setProperties(TreeMap<String, Integer> properties) {
 		this.properties = properties;
 	}
-	
-	public void addProperty(String property, int count){
-		this.properties.put(property,count);
+
+	public void addProperty(String property, int count) {
+		this.properties.put(property, count);
 	}
-	public int getProperty(String property){
-		if (this.properties.get(property)!=null){
+
+	public int getProperty(String property) {
+		if (this.properties.get(property) != null) {
 			return this.properties.get(property);
-		}
-		else
+		} else
 			return -1;
 	}
-	
-	
+
+
 	/**
 	 * Recommend the most frequent property from a set of alternatives
+	 *
 	 * @param alternatives
 	 * @return name of the most frequent alternative
 	 */
-	public String recommendTopAlternative(Set<String> alternatives){
-		
-		TreeMap<Integer,String> alternativeProperties = new TreeMap<Integer,String>(Collections.reverseOrder());
-		
-		Iterator<String> propIt = alternatives.iterator();
-		while (propIt.hasNext()){
-			String prop = propIt.next();
-			if (this.properties.get(prop)==null){
-				alternativeProperties.put(-1, prop);
+	public String recommendTopAlternative(Set<String> alternatives) {
+
+		TreeMap<Integer, String> alternativeProperties = new TreeMap<Integer, String>(Collections.reverseOrder());
+
+		if (alternatives == null) {
+			//iterate all
+			System.out.println(properties);
+			return "";
+		} else {
+			Iterator<String> propIt = alternatives.iterator();
+			while (propIt.hasNext()) {
+				String prop = propIt.next();
+				if (this.properties.get(prop) == null) {
+					alternativeProperties.put(-1, prop);
+				} else {
+					alternativeProperties.put(this.properties.get(prop), prop);
+					System.out.println("       trace, " + prop + ":" + this.properties.get(prop));
+				}
 			}
-			else{
-				alternativeProperties.put(this.properties.get(prop), prop);
-				System.out.println("       trace, "+prop+":"+this.properties.get(prop));
-			}
+			return alternativeProperties.firstEntry().getValue();
 		}
-		return alternativeProperties.firstEntry().getValue();
-		
+
 	}
-	
 }

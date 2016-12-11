@@ -11,7 +11,9 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.servlet.ServletContext;
@@ -30,14 +32,17 @@ import org.dbpedia.extraction.destinations.Quad;
 import org.dbpedia.extraction.InfoboxSandboxCustom;
 import org.dbpedia.extraction.WikiDML;
 
+import scala.Option;
 import scala.Tuple2;
 import scala.collection.Iterator;
+import scala.collection.JavaConversions;
 import scala.collection.Seq;
 import scala.collection.mutable.ArrayBuffer;
-import scala.collection.mutable.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.common.collect.Multiset.Entry;
 
 import at.tuwien.dbai.rewriter.Stopwatch;
 
@@ -55,6 +60,7 @@ public class ajaxquerySingleton {
 	private static final String PATH_MAPPINGS = "/WEB-INF/mappings";
 
 	private static final Integer MAX_SAMPLING = 300;
+
 	@POST
 	@Produces(MediaType.TEXT_HTML)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -121,17 +127,88 @@ public class ajaxquerySingleton {
 			 * info.resolveForLanguageFromUI();
 			 */
 
-			Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>, scala.collection.mutable.ArrayBuffer<String>> update = info
+			Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>>, scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>>> update = info
 					.updateFromUpdateQuery(query);
-			System.out.println("update:" + update);
+			// System.out.println("update:" + update);
 			String jscript = "";
 
 			/*
 			 * FIXME NOW LET'S ASSUME WE HAVE A LIST OF TRIPLES AS A RESULT
 			 */
-			scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>> testSeveralPages = update._1;
 
-			scala.collection.mutable.ArrayBuffer<String> titles = update._2;
+			scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>> deletes = update._1;
+			scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>> inserts = update._2;
+
+			HashMap<String, ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>>> subjectsDML = new HashMap<String, ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>>>();
+
+			Iterator<scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>>> itsubjects;
+			/* integrate deletes and inserts */
+			for (int i = 0; i < 2; i++) {
+				if (i == 0)
+					itsubjects = inserts.iterator();
+				else
+					itsubjects = deletes.iterator();
+
+				while (itsubjects.hasNext()) { // iterate on subjects
+					String subjTitle = "";
+					// System.out.println("new Subject");
+					scala.collection.mutable.ArrayBuffer<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>> itsubj = itsubjects
+							.next();
+					Iterator<Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>> itTPS = itsubj
+							.iterator();
+					ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>> subjArray = new ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>>();
+					while (itTPS.hasNext()) { // iterate on TPs
+						// System.out.println("new TP");
+						Tuple2<String, scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>> tp = itTPS
+								.next();
+						Tuple2<String, ArrayList<ArrayList<WikiDML>>> tpEntry;
+
+						scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>> severalTps = tp._2;
+
+						Iterator<scala.collection.Seq<WikiDML>> options = severalTps
+								.iterator();
+						ArrayList<ArrayList<WikiDML>> optionArray = new ArrayList<ArrayList<WikiDML>>();
+						while (options.hasNext()) { // iterate on options
+							// System.out.println("new Option");
+							scala.collection.Seq<WikiDML> option = options
+									.next();
+							Iterator<WikiDML> alternatives = option.iterator();
+							ArrayList<WikiDML> seqChanges = new ArrayList<WikiDML>();
+							while (alternatives.hasNext()) { // iterate on
+																// alternatives
+								// System.out.println("Alternative:");
+								WikiDML dml = alternatives.next();
+								subjTitle = dml.wikiPage();
+								String dmlString = dml.toString();
+								// System.out.println(dmlString);
+								seqChanges.add(dml);
+							}
+							optionArray.add(seqChanges);
+						}
+						tpEntry = new Tuple2<String, ArrayList<ArrayList<WikiDML>>>(
+								tp._1, optionArray);
+
+						subjArray.add(tpEntry);
+					}
+					ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>> listTPs = subjectsDML
+							.get(subjTitle);
+					// System.out.println("subjTitle: "+subjTitle);
+					if (listTPs != null) {
+						subjArray.addAll(listTPs); // include the previous
+													// subjects
+													// if present
+						// System.out.println("include the previous subjects");
+					}
+					subjectsDML.put(subjTitle, subjArray);
+					// System.out.println("put subjTitle: "+subjTitle);
+				}
+			}
+			// System.out.println(subjectsDML);
+
+			// scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>
+			// testSeveralPages = new
+			// scala.collection.mutable.ArrayBuffer<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>>();
+			ArrayList<String> titles = new ArrayList<String>();
 
 			// ArrayList<Tuple2<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>,
 			// scala.collection.mutable.ArrayBuffer<String>>> testSeveralPages =
@@ -143,27 +220,30 @@ public class ajaxquerySingleton {
 
 			int w = 0;
 
-			ret += "<div id=\"alternativesTriples\">";
+			ret += "<div id=\"alternativesSubjects\">";
 			int i = 0;
-			Iterator<scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>>> itWikiPages = testSeveralPages
-					.iterator();
+
+			java.util.Iterator<java.util.Map.Entry<String, ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>>>> itWikiPages = subjectsDML
+					.entrySet().iterator();
+
 			String insertPropertyDbpedia = null;
+			int numTabsVertical = 1;
 			while (itWikiPages.hasNext()) { // iterate on pages
-				// for (w = 0; w < testSeveralPages.size(); w++) {
-				scala.collection.mutable.ArrayBuffer<scala.collection.Seq<WikiDML>> wikidmls = itWikiPages
+				java.util.Map.Entry<String, ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>>> entry = itWikiPages
 						.next();
+				titles.add(entry.getKey());
+				ArrayList<Tuple2<String, ArrayList<ArrayList<WikiDML>>>> wikidmls = entry
+						.getValue();
+				title_wiki = entry.getKey();
 
 				// int i = 0;
-				ret += "<div id=\"triplestab-" + (w + 1) + "\">";
+				ret += "<div id=\"subjectstab-" + (w + 1) + "\">";
 				if (wikidmls != null) {
 
 					/*
 					 * GET infobox page for the text comparison
 					 */
 					try {
-
-						title_wiki = titles.head();
-						titles = (ArrayBuffer<String>) titles.tail();
 
 						// get JSON
 						// in the Web browser, change format to jsonfm for a
@@ -197,359 +277,436 @@ public class ajaxquerySingleton {
 					}
 					// divjsoninfoboxes+=originalWikiPage;
 
-					Iterator<Seq<WikiDML>> it = wikidmls.iterator();
-					ret += "<div id=\"alternativesDML\">";
-					ret += "<div id=\"tabsvertical-"
-							+ (w + 1)
-							+ "\" class=\"ui-tabs-verticalsmall ui-helper-clearfix\">";
+					// FIXME we have to iterate on triples too, but so far we
+					// consider 1 triple per subject
+					// java.util.Iterator<ArrayList<WikiDML>> it =
+					// wikidmls.get(0).iterator();
+					java.util.Iterator<Tuple2<String, ArrayList<ArrayList<WikiDML>>>> tps = wikidmls
+							.iterator();
 
-					String tempRetOptions = "<div id=\"tabsOptionsContent\">";
-					int initialIndex = i;
-					int numoption = 0;
-					while (it.hasNext()) { // iterate on options
-						numoption++;
-						ArrayList<String> tempInsertProperties = new ArrayList<String>();
-						ArrayList<String> tempInsertValues = new ArrayList<String>();
-						ArrayList<String> tempDelProperties = new ArrayList<String>();
-						ArrayList<String> tempDelValues = new ArrayList<String>();
+					ret += "<div id=\"tpsSubject\">";
+					String retTemp = "";
+					boolean firstTP = true;
+					while (tps.hasNext()) {
+						Tuple2<String, ArrayList<ArrayList<WikiDML>>> tpWithOriginalText = tps
+								.next();
+						String originalUpdate = tpWithOriginalText._1;
+						ArrayList<ArrayList<WikiDML>> tp = tpWithOriginalText._2;
+						java.util.Iterator<ArrayList<WikiDML>> it = tp
+								.iterator();
 
-						Seq<WikiDML> seq = it.next();
-						String addsWikipedia = "";
-						String delsWikipedia = "";
-						scala.collection.Iterator<WikiDML> it2 = seq.iterator();
-						// System.out.println("iterate it2");
-						String exportDMLs = "";
-						while (it2.hasNext()) { // iterate on various wikidml
-							WikiDML dml = it2.next();
-							String dmlString = dml.toString();
-							if (dmlString.contains("INSERT")) { // One could
-																// also use the
-																// operation
-																// property of
-																// WikiDML
-								addsWikipedia += dmlString + "<br/>";
-								// System.out.println("dmlString:" + dmlString);
-								tempInsertProperties
-										.add(getWikiPropertyFromWikiDML(dmlString));
-								tempInsertValues
-										.add(getWikiValueFromWikiDML(dmlString));
-							} else {
-								delsWikipedia += dmlString + "<br/>";
-								tempDelProperties
-										.add(getWikiPropertyFromWikiDML(dmlString));
-								tempDelValues
-										.add(getWikiValueFromWikiDML(dmlString));
+						// ret += "<div id=\"tpsSubject\">";
+						ret += "<a id=\"showtp-" + numTabsVertical
+								+ "\" style=\"cursor:pointer;";
+						if (firstTP)
+							ret += "font-weight:700";
+						ret += "\"> <img src=\"img/click.jpg\" width=5% style=\"vertical-align: middle;\">"
+								+ escapeHtml(originalUpdate) + "</a><br/>";
+						if (!firstTP)
+							ret +="<br/>";
+						retTemp += "<div id=\"tpHide-" + numTabsVertical + "\"";
+						if (firstTP)
+							firstTP = false;
+						else
+							retTemp += " style=\"display:none\"";
+						retTemp += ">";
+
+						retTemp += "<div id=\"alternativesDML\">";
+						retTemp += "<div id=\"tabsvertical-"
+								// + (w + 1)
+								+ numTabsVertical
+								+ "\" class=\"ui-tabs-verticalsmall ui-helper-clearfix\">";
+
+						numTabsVertical++;
+						// FIXME try to update
+						String tempRetOptions = "<div id=\"tabsOptionsContent\">";
+						int initialIndex = i;
+						int numoption = 0;
+						while (it.hasNext()) { // iterate on options
+							numoption++;
+							ArrayList<String> tempInsertProperties = new ArrayList<String>();
+							ArrayList<String> tempInsertValues = new ArrayList<String>();
+							ArrayList<String> tempDelProperties = new ArrayList<String>();
+							ArrayList<String> tempDelValues = new ArrayList<String>();
+
+							ArrayList<WikiDML> seq = it.next();
+							String addsWikipedia = "";
+							String delsWikipedia = "";
+							java.util.Iterator<WikiDML> it2 = seq.iterator();
+							// System.out.println("iterate it2");
+							String exportDMLs = "";
+							while (it2.hasNext()) { // iterate on various
+													// wikidml
+								WikiDML dml = it2.next();
+								String dmlString = dml.toString();
+								if (dmlString.contains("INSERT")) { // One could
+																	// also use
+																	// the
+																	// operation
+																	// property
+																	// of
+																	// WikiDML
+									addsWikipedia += dmlString + "<br/>";
+									// System.out.println("dmlString:" +
+									// dmlString);
+									tempInsertProperties
+											.add(getWikiPropertyFromWikiDML(dmlString));
+									tempInsertValues
+											.add(getWikiValueFromWikiDML(dmlString));
+								} else {
+									delsWikipedia += dmlString + "<br/>";
+									tempDelProperties
+											.add(getWikiPropertyFromWikiDML(dmlString));
+									tempDelValues
+											.add(getWikiValueFromWikiDML(dmlString));
+								}
+								/*
+								 * EXPORT WIKIDML TO BE USE IN CHECK CONSISTENCY
+								 */
+								exportDMLs += dml.exportString() + "###";
+
 							}
+
+							// testonly, add deletion to test it
 							/*
-							 * EXPORT WIKIDML TO BE USE IN CHECK CONSISTENCY
+							 * String testonly =
+							 * "ON wikiPage = Santi_Cazorla\nINSERT InfoboxTemplate(infobox football biography).name = \"Santi Cazorla\";"
+							 * ;
+							 * tempDelProperties.add(getWikiProperty(testonly));
+							 * tempDelValues.add(getWikiValue(testonly));
 							 */
-							exportDMLs += dml.exportString() + "###";
 
-						}
+							// System.out.println("end iterate");
+							tempRetOptions += "<div id=\"tabs-" + (i + 1)
+									+ "\">";
+							// ret += "<div id=\"test-" + (i + 1) +
+							// "\">Test</div>";
 
-						// testonly, add deletion to test it
-						/*
-						 * String testonly =
-						 * "ON wikiPage = Santi_Cazorla\nINSERT InfoboxTemplate(infobox football biography).name = \"Santi Cazorla\";"
-						 * ; tempDelProperties.add(getWikiProperty(testonly));
-						 * tempDelValues.add(getWikiValue(testonly));
-						 */
+							// System.out.println("call wikiResult:");
+							tempRetOptions += wikiResult();
+							// System.out.println("call startTable:");
+							tempRetOptions += startTable();
+							// System.out.println("call printRow gree:");
+							tempRetOptions += printRow(addsWikipedia, "green");
+							// System.out.println("call printRow red:");
+							tempRetOptions += printRow(delsWikipedia, "red");
+							// System.out.println("call closeTable:");
+							tempRetOptions += closeTable();
 
-						// System.out.println("end iterate");
-						tempRetOptions += "<div id=\"tabs-" + (i + 1) + "\">";
-						// ret += "<div id=\"test-" + (i + 1) + "\">Test</div>";
+							// System.out.println("call the diff:");
+							// System.out.println("seq:"+seq);
+							String addsDbpedia = "";
+							String delsDbpedia = "";
 
-						// System.out.println("call wikiResult:");
-						tempRetOptions += wikiResult();
-						// System.out.println("call startTable:");
-						tempRetOptions += startTable();
-						// System.out.println("call printRow gree:");
-						tempRetOptions += printRow(addsWikipedia, "green");
-						// System.out.println("call printRow red:");
-						tempRetOptions += printRow(delsWikipedia, "red");
-						// System.out.println("call closeTable:");
-						tempRetOptions += closeTable();
+							if (seq.size() > 0) {
+								// Tuple2 tuple =
+								// info.getDiffFromInfoboxUpdate_fromUI(seq);
+								// getDiffFromInfoboxUpdate_fromUI not needed
+								Tuple2 tuple = info.getDiffFromInfoboxUpdate(
+										JavaConversions.asScalaBuffer(seq)
+												.toSeq(), null);
 
-						// System.out.println("call the diff:");
-						// System.out.println("seq:"+seq);
-						String addsDbpedia = "";
-						String delsDbpedia = "";
+								// System.out.println("tuple is:" +
+								// tuple.toString());
 
-						if (seq.size() > 0) {
-							// Tuple2 tuple =
-							// info.getDiffFromInfoboxUpdate_fromUI(seq);
-							// getDiffFromInfoboxUpdate_fromUI not needed
-							Tuple2 tuple = info.getDiffFromInfoboxUpdate(seq,
-									null);
+								if (tuple._1() != null
+										&& !tuple._1().toString()
+												.equalsIgnoreCase("List()")) {
+									Seq<Quad> quads = (Seq<Quad>) tuple._1();
+									Iterator<Quad> itQuad = quads.iterator();
+									while (itQuad.hasNext()) {
+										Quad quad = itQuad.next();
+										delsDbpedia += parseQuad(quad)
+												+ "<br/>";
 
-							// System.out.println("tuple is:" +
-							// tuple.toString());
+									}
+								}
+								if (tuple._2() != null
+										&& !tuple._2().toString()
+												.equalsIgnoreCase("List()")) {
+									Seq<Quad> quads = (Seq<Quad>) tuple._2();
+									Iterator<Quad> itQuad = quads.iterator();
+									while (itQuad.hasNext()) {
+										Quad quad = itQuad.next();
+										addsDbpedia += parseQuad(quad)
+												+ "<br/>";
 
-							if (tuple._1() != null
-									&& !tuple._1().toString()
-											.equalsIgnoreCase("List()")) {
-								Seq<Quad> quads = (Seq<Quad>) tuple._1();
-								Iterator<Quad> itQuad = quads.iterator();
-								while (itQuad.hasNext()) {
-									Quad quad = itQuad.next();
-									delsDbpedia += parseQuad(quad) + "<br/>";
+										if (insertPropertyDbpedia == null) {
+											insertPropertyDbpedia = quad
+													.predicate();
+										}
 
+									}
 								}
 							}
-							if (tuple._2() != null
-									&& !tuple._2().toString()
-											.equalsIgnoreCase("List()")) {
-								Seq<Quad> quads = (Seq<Quad>) tuple._2();
-								Iterator<Quad> itQuad = quads.iterator();
-								while (itQuad.hasNext()) {
-									Quad quad = itQuad.next();
-									addsDbpedia += parseQuad(quad) + "<br/>";
 
-									if (insertPropertyDbpedia == null) {
-										insertPropertyDbpedia = quad
-												.predicate();
+							tempRetOptions += DBpediaResult();
+							tempRetOptions += startTable();
+							tempRetOptions += printRow(addsDbpedia, "green");
+							tempRetOptions += printRow(delsDbpedia, "red");
+							tempRetOptions += closeTable();
+							tempRetOptions += "<div style=\"padding-top:10px;width:100%; text-align: left\"><a id=\"mailFeedback\" href=\"mailto:dbpediaupdate@ai.wu.ac.at?subject=feedback on query&body=Hi, please check the query:\n\n"
+									+ escapeHtml(query)
+									+ "\" title=\"Report on query results\"><img src=\"img/mail.png\" style=\"padding-right:10px;\" width=50px>Report on query results</a></div>";
+
+							tempRetOptions += "<div id=\"consistencywikiDMLs-"
+									+ (i + 1)
+									+ "\" style=\"text-align:right\"> Mark to check consistency <input type=\"checkbox\" name=\"wikidml\" value=\"wikiDMLs-"
+									+ (i + 1) + "\"";
+							if (numoption == 1) {
+								tempRetOptions += " checked";
+							}
+
+							tempRetOptions += "><div style=\"display:none\" id=\"wikiDMLs-"
+									+ (i + 1)
+									+ "\">"
+									+ exportDMLs
+									+ "</div></div>";
+							/*
+							 * UPDATE SCRIPT
+							 */
+							/*
+							 * jscript+="$(\"#tabselect-"+(i +
+							 * 1)+"\").click(function(){\n";
+							 * jscript+="alert(\"visible!\");\n";
+							 * jscript+="$(\"#jsoninfobox-"+(i +
+							 * 1)+"\").show()\n"; jscript
+							 * +="$('#infobox_text').html('tabs-"+(i+1)+"');\n"
+							 * + "});\n";
+							 */
+
+							tempRetOptions += "</div>"; // close tabs-"+i
+
+							/*
+							 * Apply wiki page changes
+							 */
+							String currentWikiPage = originalWikiPage;
+
+							// insert new properties
+							int posInfobox = currentWikiPage
+									.indexOf("{{Infobox");
+							String preInsert = currentWikiPage.substring(0,
+									currentWikiPage.indexOf("|", posInfobox));
+							// System.out.println("preInsert:" + preInsert);
+							String postInsert = currentWikiPage
+									.substring(currentWikiPage.indexOf("|",
+											posInfobox));
+							// System.out.println("postInsert:" + postInsert);
+							String insertlines = "";
+
+							/*
+							 * TEST
+							 */
+							/*
+							 * for (int j = 0; j < tempInsertProperties.size();
+							 * j++) {
+							 * System.out.println("tempInsertProperties.get(" +
+							 * j + "):" + tempInsertProperties.get(j)); } for
+							 * (int j = 0; j < tempInsertValues.size(); j++) {
+							 * System.out.println("tempInsertValues.get(" + j +
+							 * "):" + tempInsertValues.get(j)); }
+							 */
+
+							for (int j = 0; j < tempInsertProperties.size(); j++) {
+
+								insertlines += "<span style=\"background-color: green;\">"
+										+ "| "
+										+ tempInsertProperties.get(j)
+										+ " = "
+										+ tempInsertValues.get(j).replace("\"",
+												"") + "</span>" + "<br>";
+							}
+							currentWikiPage = preInsert + insertlines
+									+ postInsert;
+							// System.out.println("currentWikiPage:"+currentWikiPage);
+
+							// TODO DEBUG
+							// tempDelProperties.add("name");
+							// delete properties
+
+							for (int j = 0; j < tempDelProperties.size(); j++) {
+								String valueNoQuotes = tempDelValues.get(j)
+										.replace("\"", "");
+								// System.out.println("searching:"+"\\| "+tempDelProperties.get(j)+
+								// " = " + valueNoQuotes+"<br\\/>"); //escape /
+								// of
+								// <br/>
+								// System.out.println("matches:"+currentWikiPage.matches("\\| "+tempDelProperties.get(j)+
+								// " = " + valueNoQuotes+"<br\\/>")); //escape /
+								// of
+								// <br/>
+								/*
+								 * currentWikiPage =
+								 * currentWikiPage.replaceAll("\\| " +
+								 * tempDelProperties.get(j) + " = " +
+								 * valueNoQuotes + "<br\\/>", ""); // escape
+								 */// / of
+									// <br/>
+								String tooltip = "<span style=\"background-color: red;\" title=\""
+										+ tempDelProperties.get(j)
+										+ " = "
+										+ valueNoQuotes
+										+ "\">&nbsp;&nbsp;&nbsp;</span><br\\/>";
+								currentWikiPage = currentWikiPage.replaceAll(
+										"\\| " + tempDelProperties.get(j)
+												+ " += " + valueNoQuotes
+												+ "<br\\/>", tooltip); // +=
+																		// escape
+																		// one
+																		// or
+																		// more
+																		// spaces
+																		// escape
+																		// /
+																		// of
+																		// <br/>
+
+							}
+							System.out.println("currentWikiPage after:"
+									+ currentWikiPage);
+
+							if (i == 0) {
+								divjsoninfoboxes += "<div id=\"jsoninfobox-"
+										+ (i + 1) + "\">";
+							} else {
+								divjsoninfoboxes += "<div id=\"jsoninfobox-"
+										+ (i + 1)
+										+ "\" style=\"display:none\">";
+							}
+							divjsoninfoboxes += "<img style=\"cursor:pointer;\" title=\"Copy text to your clipboard\" width=30px align=\"middle\" src=\"img/copy.png\" id=\"copyButton-"
+									+ (i + 1)
+									+ "\"><span id=\"msg-"
+									+ (i + 1)
+									+ "\"></span><br/>";
+							divjsoninfoboxes += currentWikiPage + "</div>";
+
+							i++;
+						}
+
+						tempRetOptions += "</div>"; // close tabsOptionsContent
+
+						// <div id=\"chart_div\"></div>
+
+						if (stats != null && stats.equalsIgnoreCase("true")
+								&& insertPropertyDbpedia != null) {
+
+							int sampling = 100;
+							if (sample != null) {
+								try {
+									sampling = Integer.parseInt(sample);
+									if (sampling > MAX_SAMPLING) {
+										sampling = MAX_SAMPLING;
+									}
+								} catch (NumberFormatException e) {
+									sampling = 100;
+								}
+							}
+							scala.collection.mutable.HashMap<String, Object> statOutput = new scala.collection.mutable.HashMap<>();
+							// FIXME this has to be changed to work with
+							// Arraylist
+							/*
+							 * scala.collection.mutable.HashMap<String, Object>
+							 * statOutput = info.getStatResultsAlternatives(
+							 * "<http://dbpedia.org/resource/" + title_wiki +
+							 * ">", insertPropertyDbpedia, sampling, wikidmls);
+							 */
+
+							retTemp += "<div style=\"margin-bottom:10px\">";
+							// <a
+							// id=\"showstats\" style=\"cursor:pointer\">Show/Hide Stats</a>";
+							System.out.println(statOutput);
+							/*
+							 * ret += " <script type=\"text/javascript\">\n" +
+							 * //
+							 * ret+="<div id=\"stats\" style=\"display:none;\">"
+							 * +
+							 * 
+							 * //
+							 * "$.getScript(\"https://www.google.com/jsapi\", function () {\n"
+							 * +
+							 * 
+							 * "google.load('visualization', '1.0', {'packages':['corechart']});\n"
+							 * + "$(document).ready(function() {" +
+							 * "google.setOnLoadCallback(drawChart);\n" +
+							 * "function drawChart() {\n" +
+							 * "var data = new google.visualization.DataTable();\n"
+							 * + "data.addColumn('string', 'course');\n" +
+							 * "data.addColumn('number', 'number of registered students');\n"
+							 * +
+							 * "data.addRows([['name',99],['playername',50],['fullname',30]]);\n"
+							 * + " var options = {\n" +
+							 * "legend: { position: 'none' },\n" +
+							 * "vAxis: {title: 'Infobox Football biography', minValue: 0},\n"
+							 * + " hAxis: {title: 'Coverage %'}\n" + "};\n" +
+							 * 
+							 * " var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));\n"
+							 * + "chart.draw(data, options);\n" + "}\n" + "});"
+							 * + // "</div> "; "</script>";
+							 */
+							if (statOutput.size() > 0) {
+								Iterator<String> itprops = statOutput
+										.keysIterator();
+								retTemp += "<table id=\"statsTable\" style=\"margin-left:150px;\"><tr><td colspan=2 bgcolor=lightgrey> Presence of alternative wikipedia properties producing '"
+										+ insertPropertyDbpedia + "'</td><tr>";
+
+								while (itprops.hasNext()) {
+									String props = itprops.next();
+									Integer value = Integer.parseInt(statOutput
+											.get(props).toString()
+											.replace("(", "").replace(")", "")
+											.replace("Some", ""));
+									// erase the infobox info
+									props = props
+											.substring(props.indexOf(':') + 1);
+									int length = 0;
+									String per = "0 %";
+									if (value != 0) {
+										length = 400 * (sampling / value);
+										int percentage = (sampling / value) * 100;
+										per = percentage + " %";
 									}
 
+									retTemp += "<tr><td>"
+											+ props
+											+ ":</td><td><table><tr><td bgcolor=\""
+											+ getRandomColor()
+											+ "\" height=\"10px\" width=\""
+											+ length + "px\" title=\"" + per
+											+ "\"></td></tr></table></td></tr>";
 								}
+								retTemp += "</table>";
 							}
+
+							// ret+=statOutput.toString();
+							retTemp += "</div>";
 						}
+						/*
+						 * Write the name of the tabs
+						 */
+						retTemp += "<div id=\"tabsOptionsmenu\">";
+						retTemp += "<ul id=\"tabsnum\">";
 
-						tempRetOptions += DBpediaResult();
-						tempRetOptions += startTable();
-						tempRetOptions += printRow(addsDbpedia, "green");
-						tempRetOptions += printRow(delsDbpedia, "red");
-						tempRetOptions += closeTable();
-						tempRetOptions += "<div style=\"padding-top:10px;width:100%; text-align: left\"><a id=\"mailFeedback\" href=\"mailto:albin.ahmeti@wu.ac.at?subject=feedback on query&body=Hi, please check the query:\n\n"
-								+ escapeHtml(query)
-								+ "\" title=\"Report on query results\"><img src=\"img/mail.png\" style=\"padding-right:10px;\" width=50px>Report on query results</a></div>";
-
-						tempRetOptions += "<div id=\"consistencywikiDMLs-"
-								+ (i + 1)
-								+ "\" style=\"text-align:right\"> Mark to check consistency <input type=\"checkbox\" name=\"wikidml\" value=\"wikiDMLs-"
-								+ (i + 1)
-								+ "\"";
-						if (numoption==1){
-							tempRetOptions+=" checked";
+						for (int n = initialIndex; n < i; n++) {
+							retTemp += "<li><a id=\"tabselect-" + (n + 1)
+									+ "\" href=\"#tabs-" + (n + 1) + "\">OPT#"
+									+ (n + 1) + "</a></li>\n";
 						}
-						
-						tempRetOptions+="><div style=\"display:none\" id=\"wikiDMLs-"
-								+ (i + 1) + "\">" + exportDMLs + "</div></div>";
-						/*
-						 * UPDATE SCRIPT
-						 */
-						/*
-						 * jscript+="$(\"#tabselect-"+(i +
-						 * 1)+"\").click(function(){\n";
-						 * jscript+="alert(\"visible!\");\n";
-						 * jscript+="$(\"#jsoninfobox-"+(i + 1)+"\").show()\n";
-						 * jscript
-						 * +="$('#infobox_text').html('tabs-"+(i+1)+"');\n" +
-						 * "});\n";
-						 */
+						retTemp += "</ul>"; // close tabsNum
 
-						tempRetOptions += "</div>"; // close tabs-"+i
+						retTemp += "</div>"; // close tabsOptionsmenu
 
-						/*
-						 * Apply wiki page changes
-						 */
-						String currentWikiPage = originalWikiPage;
+						retTemp += tempRetOptions;
+						retTemp += "</div>"; // close tabsvertical
 
-						// insert new properties
-						int posInfobox = currentWikiPage.indexOf("{{Infobox");
-						String preInsert = currentWikiPage.substring(0,
-								currentWikiPage.indexOf("|", posInfobox));
-						// System.out.println("preInsert:" + preInsert);
-						String postInsert = currentWikiPage
-								.substring(currentWikiPage.indexOf("|",
-										posInfobox));
-						// System.out.println("postInsert:" + postInsert);
-						String insertlines = "";
+						retTemp += "</div>"; // close alternativesDML
+						retTemp += "</div>"; // close tpHide
 
-						/*
-						 * TEST
-						 */
-						/*
-						 * for (int j = 0; j < tempInsertProperties.size(); j++)
-						 * { System.out.println("tempInsertProperties.get(" + j
-						 * + "):" + tempInsertProperties.get(j)); } for (int j =
-						 * 0; j < tempInsertValues.size(); j++) {
-						 * System.out.println("tempInsertValues.get(" + j + "):"
-						 * + tempInsertValues.get(j)); }
-						 */
-
-						for (int j = 0; j < tempInsertProperties.size(); j++) {
-
-							insertlines += "<span style=\"background-color: green;\">"
-									+ "| "
-									+ tempInsertProperties.get(j)
-									+ " = "
-									+ tempInsertValues.get(j).replace("\"", "")
-									+ "</span>" + "<br>";
-						}
-						currentWikiPage = preInsert + insertlines + postInsert;
-						// System.out.println("currentWikiPage:"+currentWikiPage);
-
-						// TODO DEBUG
-						// tempDelProperties.add("name");
-						// delete properties
-
-						for (int j = 0; j < tempDelProperties.size(); j++) {
-							String valueNoQuotes = tempDelValues.get(j)
-									.replace("\"", "");
-							// System.out.println("searching:"+"\\| "+tempDelProperties.get(j)+
-							// " = " + valueNoQuotes+"<br\\/>"); //escape / of
-							// <br/>
-							// System.out.println("matches:"+currentWikiPage.matches("\\| "+tempDelProperties.get(j)+
-							// " = " + valueNoQuotes+"<br\\/>")); //escape / of
-							// <br/>
-							/*
-							 * currentWikiPage =
-							 * currentWikiPage.replaceAll("\\| " +
-							 * tempDelProperties.get(j) + " = " + valueNoQuotes
-							 * + "<br\\/>", ""); // escape
-							 */// / of
-								// <br/>
-							String tooltip = "<span style=\"background-color: red;\" title=\""
-									+ tempDelProperties.get(j)
-									+ " = "
-									+ valueNoQuotes
-									+ "\">&nbsp;&nbsp;&nbsp;</span><br\\/>";
-							currentWikiPage = currentWikiPage.replaceAll("\\| "
-									+ tempDelProperties.get(j) + " += "
-									+ valueNoQuotes + "<br\\/>", tooltip); // +=
-																			// escape
-																			// one
-																			// or
-																			// more
-																			// spaces
-																			// escape
-																			// /
-																			// of
-																			// <br/>
-
-						}
-						System.out.println("currentWikiPage after:"
-								+ currentWikiPage);
-
-						if (i == 0) {
-							divjsoninfoboxes += "<div id=\"jsoninfobox-"
-									+ (i + 1) + "\">";
-						} else {
-							divjsoninfoboxes += "<div id=\"jsoninfobox-"
-									+ (i + 1) + "\" style=\"display:none\">";
-						}
-						divjsoninfoboxes += "<img style=\"cursor:pointer;\" title=\"Copy text to your clipboard\" width=30px align=\"middle\" src=\"img/copy.png\" id=\"copyButton-"
-								+ (i + 1)
-								+ "\"><span id=\"msg-"
-								+ (i + 1)
-								+ "\"></span><br/>";
-						divjsoninfoboxes += currentWikiPage + "</div>";
-
-						i++;
 					}
-
-					tempRetOptions += "</div>"; // close tabsOptionsContent
-
-					// <div id=\"chart_div\"></div>
-
-					if (stats != null && stats.equalsIgnoreCase("true")
-							&& insertPropertyDbpedia != null) {
-						
-						int sampling = 100;
-						if (sample != null) {
-							try {
-								sampling = Integer.parseInt(sample);
-								if (sampling>MAX_SAMPLING){
-									sampling = MAX_SAMPLING;
-								}
-							} catch (NumberFormatException e) {
-								sampling = 100;
-							}
-						}
-						 HashMap<String, Object> statOutput = info.getStatResultsAlternatives(
-								"<http://dbpedia.org/resource/" + title_wiki
-										+ ">", insertPropertyDbpedia, sampling,
-								wikidmls);
-
-						ret += "<div style=\"margin-bottom:10px\">";
-							//<a id=\"showstats\" style=\"cursor:pointer\">Show/Hide Stats</a>";
-						System.out.println(statOutput);
-					/*	ret += " <script type=\"text/javascript\">\n"
-								+
-								// ret+="<div id=\"stats\" style=\"display:none;\">"+
-
-								// "$.getScript(\"https://www.google.com/jsapi\", function () {\n"+
-
-								"google.load('visualization', '1.0', {'packages':['corechart']});\n"
-								+ "$(document).ready(function() {"
-								+ "google.setOnLoadCallback(drawChart);\n"
-								+ "function drawChart() {\n"
-								+ "var data = new google.visualization.DataTable();\n"
-								+ "data.addColumn('string', 'course');\n"
-								+ "data.addColumn('number', 'number of registered students');\n"
-								+ "data.addRows([['name',99],['playername',50],['fullname',30]]);\n"
-								+ " var options = {\n"
-								+ "legend: { position: 'none' },\n"
-								+ "vAxis: {title: 'Infobox Football biography', minValue: 0},\n"
-								+ " hAxis: {title: 'Coverage %'}\n"
-								+ "};\n"
-								+
-
-								" var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));\n"
-								+ "chart.draw(data, options);\n" + "}\n"
-								+ "});" +
-								// "</div> ";
-								"</script>";
-						*/
-						if (statOutput.size()>0){
-							Iterator<String> itprops= statOutput.keysIterator();
-							ret+="<table id=\"statsTable\" style=\"margin-left:150px;\"><tr><td colspan=2 bgcolor=lightgrey> Presence of alternative wikipedia properties producing '"+insertPropertyDbpedia+"'</td><tr>";
-							
-							
-							while(itprops.hasNext()){
-								String props = itprops.next();
-								Integer value = Integer.parseInt(statOutput.get(props).toString().replace("(","").replace(")", "").replace("Some", ""));
-								//erase the infobox info
-								props=props.substring(props.indexOf(':')+1);
-								int length=0;
-								String per="0 %";
-								if (value!=0){
-									length=400*(sampling/value);
-									int percentage = (sampling/value)*100;
-									per = percentage+" %";
-								}
-								
-								ret+="<tr><td>"+props+":</td><td><table><tr><td bgcolor=\""+getRandomColor()+"\" height=\"10px\" width=\""+length+"px\" title=\""+per+"\"></td></tr></table></td></tr>";
-							}
-							ret+="</table>";
-						}
-						
-						//ret+=statOutput.toString();
-						ret += "</div>";
-					}
-					/*
-					 * Write the name of the tabs
-					 */
-					ret += "<div id=\"tabsOptionsmenu\">";
-					ret += "<ul id=\"tabsnum\">";
-
-					for (int n = initialIndex; n < i; n++) {
-						ret += "<li><a id=\"tabselect-" + (n + 1)
-								+ "\" href=\"#tabs-" + (n + 1) + "\">OPT#"
-								+ (n + 1) + "</a></li>\n";
-					}
-					ret += "</ul>"; // close tabsNum
-
-					ret += "</div>"; // close tabsOptionsmenu
-
-					ret += tempRetOptions;
-					ret += "</div>"; // close tabsvertical
-
-					ret += "</div>"; // close alternativesDML
+					ret += retTemp + "</div>"; // close tpsSubject;
 
 				}
 
-				ret += "</div>"; // close triplestab
+				ret += "</div>"; // close subjectstab
 
 				w += 1;
 			}
@@ -567,8 +724,8 @@ public class ajaxquerySingleton {
 
 			for (int n = 1; n <= w; n++) {
 				ret += "<li><a id=\"tabtriplesselect-" + n
-						+ "\" href=\"#triplestab-" + n + "\">TP#" + n
-						+ "</a></li>\n";
+						+ "\" href=\"#subjectstab-" + n + "\">"
+						+ titles.get(n - 1) + "</a></li>\n";
 			}
 			ret += "</ul>"; // close tabsNum
 
@@ -582,10 +739,27 @@ public class ajaxquerySingleton {
 					+ "$(document).ready(function() {\n";
 			// ret+="alert(\"test\");\n";
 
-			for (int p = 1; p <= w; p++) {
+			// for (int p = 1; p <= w; p++) {
+			for (int p = 1; p <= numTabsVertical; p++) {
 				jscript += "$(\"#tabsvertical-" + p + "\" ).tabs();\n";
+				System.out
+						.println("\n*****************Doing tabs: " + p + "\n");
 
+				// add show/hide functionality
+				jscript += "document.getElementById(\"showtp-" + p
+						+ "\").addEventListener(\"click\", function() {\n";
+				jscript += "$('#showtp-" + p
+						+ "').css( 'font-weight', '700' );";
+				for (int k = 1; k <= numTabsVertical; k++) {
+					if (k != p) {
+						jscript += "$(\"#tpHide-" + k + "\").hide();\n";
+						jscript += "$('#showtp-" + k
+								+ "').css( 'font-weight', '400' );";
+					}
+				}
+				jscript += "$(\"#tpHide-" + p + "\").show();\n" + "});\n";
 			}
+			System.out.println("jscript so far:" + jscript);
 
 			/*
 			 * UPDATE SCRIPT
@@ -608,11 +782,11 @@ public class ajaxquerySingleton {
 				 * jscript+="$('#infobox_text').html('tabs-"+(i+1)+"');\n" +
 				 * "});\n";
 				 */
-				
-				//for the visibility of the stats
-			//	jscript+="$( \"#showstats\" ).click(function() {\n"+
-				//		"$( \"#statsTable\").toggle();\n"+
-					//	"});\n";			
+
+				// for the visibility of the stats
+				// jscript+="$( \"#showstats\" ).click(function() {\n"+
+				// "$( \"#statsTable\").toggle();\n"+
+				// "});\n";
 			}
 
 			ret += jscript;
@@ -688,7 +862,7 @@ public class ajaxquerySingleton {
 		// #73AD21
 		String ret = "<td valign=\"top\"><div style=\"border-radius: 25px; border: 2px solid "
 				+ color
-				+ "; padding: 20px; width: 400px; min-height: 150px; word-break: break-all; white-space: normal;\">";
+				+ "; padding: 20px; width: 350px; min-height: 150px; word-break: break-all; white-space: normal;\">";
 		ret += values;
 		ret += "</div></td>";
 		return ret;
@@ -731,13 +905,14 @@ public class ajaxquerySingleton {
 																				// last
 																				// ';'
 	}
+
 	public String getRandomColor() {
 		Random rand = new Random();
 		float r = rand.nextFloat();
 		float g = rand.nextFloat();
 		float b = rand.nextFloat();
-		//Color randomColor = new Color(r, g, b);
-	    
-	    return "rgb("+r+","+g+","+b+")";
+		// Color randomColor = new Color(r, g, b);
+
+		return "rgb(" + r + "," + g + "," + b + ")";
 	}
 }

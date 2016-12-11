@@ -429,14 +429,15 @@ object TestInfoboxPropertyGaps {
     val newInfoboxProperties = new ArrayBuffer[WikiDML]()
 
     // flatten wikiDMLs
-    val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
+    /* JAvier> commented
+        val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
 
-    for (infobox <- setWikiDML) {
+        for (infobox <- setWikiDML) {
 
-      if (infobox.property.startsWith("twin") && !infobox.property.equals("twins"))
-        newInfoboxProperties += infobox
-    }
-
+          if (infobox.property.startsWith("twin") && !infobox.property.equals("twins"))
+            newInfoboxProperties += infobox
+        }
+    */
     test.countInfoboxPropertiesWithGaps(subjects, newInfoboxProperties)
 
   }
@@ -471,7 +472,7 @@ object TestNewStatisticsFromUI {
 
 
     // this is the call from the UI, i.e., subject in Dbpedia, Predicate in Dbpedia and wiki alternatives
-    println(test.getStatResultsAlternatives(subject,predicate,sample,setWikiDML))
+  //  println(test.getStatResultsAlternatives(subject,predicate,sample,setWikiDML))
 
   }
 
@@ -535,9 +536,9 @@ object TestStatistics {
     val wikiDMLs = test.resolveUpdate(update)
 
     // flatten wikiDMLs
-    val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
+   // val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
 
-    println(test.countInfoboxProperties(subjects, setWikiDML))
+  //  println(test.countInfoboxProperties(subjects, setWikiDML))
 
   }
 

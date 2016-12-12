@@ -6,41 +6,36 @@ import org.dbpedia.extraction.destinations.Quad
   * Created by Vadim on 09.11.2016.
   */
 class ResolutionPattern (
-    val wikiPage: String, // should be URI, what is a relevant datatype
-    var wikiDelete: Seq[Quad], // each triple represents a deleted Wiki property
-    var wikiInsert: Seq[Quad], // each triple represents an inserted Wiki property using variables
-    var rdfDelete: Seq[Quad],  // deleted dbpedia triples
-    var rdfInsert: Seq[Quad], // inserted dbpedia triples using variable
+    val infoboxType: String, // should be URI, what is a relevant datatype
+    val wikiDelete: Seq[Quad], // each triple represents a deleted Wiki property
+    val wikiInsert: Seq[Quad], // each triple represents an inserted Wiki property using variables
+    val rdfDelete: Seq[Quad],  // deleted dbpedia triples
+    val rdfInsert: Seq[Quad], // inserted dbpedia triples using variable
+    val inducedBy: InducedUpdateReason )
+  {
 
-    // relevant Input Quad + precondition + Axiom? => induced ResPattern
+  override def toString(): String = toString(x=>x)
 
-    //e.g. Axiom would be "Infobox Key Constraint"
-    // .. or, "Mapping condition" -> induced ResPatter will include a WikiInsert / wikiDelete
-    // ... or a particular TBox rule (e.g., disjointness /functionality)
+  def toString( f: String => String ): String = {
+    val prefix = s"InfoboxTemplate($infoboxType)"
 
-    val infobox:String,
+    val delOp = if (wikiDelete.isEmpty) ""
+                else s"DELETE " + wikiDelete.map(d =>s"$prefix.${d.predicate}").mkString(", ")
+    val insOp = if (wikiInsert.isEmpty) ""
+                else "INSERT " + wikiInsert.map(d =>
+                    s"$prefix.${d.predicate} = ${f(d.value)}").mkString(", ")
 
-    val property:String,
-    val oldValue: String=null,
-    val newValue: String=null,
-    val operation: String) {
-
-  override def toString(): String = {
-    if (operation == "UPDATE")
-      return "ON wikiPage = " + wikiPage + "\n" +
-        operation.toUpperCase() + " InfoboxTemplate(" + infobox + ")." + property + " = " + newValue + "\n" +
-        "WHERE" + " InfoboxTemplate(" + infobox + ")." + property + " = " + oldValue + ";\n"
-    else if (operation == "INSERT")
-      return "ON wikiPage = " + wikiPage + "\n" +
-        operation.toUpperCase() + " InfoboxTemplate(" + infobox + ")." + property + " = " + newValue + ";\n"
-    else
-      return "ON wikiPage = " + wikiPage + "\n" +
-        operation.toUpperCase() + " InfoboxTemplate(" + infobox + ")." + property + ";\n"
-
+    s"ON wikiPage = ${f("?PAGE")} $delOp $insOp"
   }
 
-  def exportString(): String = {
-    return wikiPage + "$$" + infobox + "$$" + property + "$$" + oldValue + "$$" + newValue + "$$" + operation + "$$"
+  def exportString(f: String => String): String = {
+    val S = "$$"
+    val d = wikiDelete.map(d =>
+      s"${f("?PAGE")}${S}${infoboxType}${S}${d.predicate}$S ${S}DELETE${S}")
+    val i = wikiInsert.map(d =>
+      s"${f("?PAGE")}${S}${infoboxType}${S}${d.predicate}$S ${S}UPDATE${S}")
+
+    d.mkString("\n") + "\n" + i.mkString("\n")
   }
 
 }

@@ -10,10 +10,10 @@ class Update (
 {
   def getMaterializedQuads( component : UpdateComponent ): Seq[Quad] = {
       component match {
-        case WikiInsert => pattern.wikiInsert
-        case WikiDelete => pattern.wikiDelete
-        case RdfInsert => pattern.rdfInsert
-        case RdfDelete => pattern.rdfDelete
+        case UpdateComponent.WikiInsert => pattern.wikiInsert
+        case UpdateComponent.WikiDelete => pattern.wikiDelete
+        case UpdateComponent.RdfInsert => pattern.rdfInsert
+        case UpdateComponent.RdfDelete => pattern.rdfDelete
       }
   }
 

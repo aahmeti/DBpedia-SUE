@@ -2,9 +2,6 @@ package org.dbpedia.updateresolution
 
 import org.dbpedia.extraction.destinations.Quad
 
-/**
-  * Created by Vadim on 09.11.2016.
-  */
 class ResolutionPattern (
     val infoboxType: String, // should be URI, what is a relevant datatype
     val wikiDelete: Seq[Quad], // each triple represents a deleted Wiki property

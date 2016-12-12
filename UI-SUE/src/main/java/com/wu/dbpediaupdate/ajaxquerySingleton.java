@@ -322,14 +322,17 @@ public class ajaxquerySingleton {
 						String tempRetOptions = "<div id=\"tabsOptionsContent\">";
 						int initialIndex = i;
 						int numoption = 0;
+						ArrayList<Seq<WikiDML>> seqsampling = new ArrayList<Seq<WikiDML>>();
 						while (it.hasNext()) { // iterate on options
 							numoption++;
 							ArrayList<String> tempInsertProperties = new ArrayList<String>();
 							ArrayList<String> tempInsertValues = new ArrayList<String>();
 							ArrayList<String> tempDelProperties = new ArrayList<String>();
 							ArrayList<String> tempDelValues = new ArrayList<String>();
-
+								
 							ArrayList<WikiDML> seq = it.next();
+							Seq<WikiDML> seqalternatives = JavaConversions.asScalaBuffer(seq).toSeq();
+							seqsampling.add(seqalternatives);
 							String addsWikipedia = "";
 							String delsWikipedia = "";
 							java.util.Iterator<WikiDML> it2 = seq.iterator();
@@ -604,12 +607,13 @@ public class ajaxquerySingleton {
 							scala.collection.mutable.HashMap<String, Object> statOutput = new scala.collection.mutable.HashMap<>();
 							// FIXME this has to be changed to work with
 							// Arraylist
-							/*
-							 * scala.collection.mutable.HashMap<String, Object>
-							 * statOutput = info.getStatResultsAlternatives(
-							 * "<http://dbpedia.org/resource/" + title_wiki +
-							 * ">", insertPropertyDbpedia, sampling, wikidmls);
-							 */
+							Seq<Seq<WikiDML>> seqsamplingStats = JavaConversions.asScalaBuffer(seqsampling).toSeq();
+							
+							  
+							  statOutput = info.getStatResultsAlternatives(
+							  "<http://dbpedia.org/resource/" + title_wiki +
+							  ">", insertPropertyDbpedia, sampling, seqsamplingStats);
+							 
 
 							retTemp += "<div style=\"margin-bottom:10px\">";
 							// <a

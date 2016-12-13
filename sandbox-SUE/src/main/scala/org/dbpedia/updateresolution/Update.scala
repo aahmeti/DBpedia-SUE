@@ -1,7 +1,7 @@
 package org.dbpedia.updateresolution
 
 class Update (
-               pattern: ResolutionPattern,
+               pattern: UpdatePattern,
                instantiation: Map[String, String]
              )
 {

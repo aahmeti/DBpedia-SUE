@@ -24,7 +24,6 @@ import wikiPropertiesRecommendation.WikiTemplateManager
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream.Empty
 import scala.io.Source
-
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, HashMap, MultiMap, Set}
 import scalax.file.Path

@@ -8,6 +8,7 @@ class Update (
    instantiation: Map[String, Value]
 )
 {
+
   def getMaterializedQuads( component : UpdateComponent ): Seq[Quad] = {
       component match {
         case UpdateComponent.WikiInsert => pattern.wikiInsert
@@ -16,6 +17,5 @@ class Update (
         case UpdateComponent.RdfDelete => pattern.rdfDelete
       }
   }
-
 }
 

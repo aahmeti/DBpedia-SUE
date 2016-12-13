@@ -674,7 +674,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
 
-  def resolveUpdate(update: UpdateRequest, computeStat:Boolean=false): (ArrayBuffer[ArrayBuffer[Seq[WikiDML]]], ArrayBuffer[String]) = {
+  def resolveUpdate(update: UpdateRequest, computeStat:Boolean=false): (ArrayBuffer[ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]]],ArrayBuffer[ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]]]) = {
+    val deletes = new ArrayBuffer[ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]]] //subject-> TPs (with original update)-> options->consequences per TP
+
+
+    val inserts = new ArrayBuffer[ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]]] //subject-> TPs (with original update)-> options->consequences per TP
+
     val wikiDML = new ArrayBuffer[ArrayBuffer[Seq[WikiDML]]]
     val titles = new ArrayBuffer[String]
 
@@ -688,10 +693,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     // Resolve DELETEs
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    for ((subject, quads) <- groupedUpdate._1) {
-      // take deletes
 
-      val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
+
+    for ((subject, quads) <- groupedUpdate._1) { //for each subject
+      // take deletes
+     val deletesForSubject =  new ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]] //TPs-> options->consequences per TP
+
+
+
 
       // download the page and do extraction of quads
       var title = subject.toString
@@ -719,12 +728,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         parser(page) match {
           case Some(n) =>
 
-            for (update <- quads) {
+            for (update <- quads) { //for each TP
 
               val triple = update.asTriple
+              val subjwikiDML = new ArrayBuffer[Seq[WikiDML]] //array of options, each option can be a SEQ of WikiDML changes
               subjwikiDML += extractor.resolve(n, subjectUri = triple.getSubject.toString, context = new PageContext(),
                 updateSubjectUri = null, triple.getPredicate.toString, triple.getObject.toString, "DELETE")
               println(wikiDML)
+              deletesForSubject+=new Tuple2("[DELETE] "+update.getPredicate.toString()+" "+update.getObject.toString(),subjwikiDML)  //currently, only one option to delete
             }
 
           case None => Seq.empty
@@ -733,7 +744,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       catch {
         case _: NoSuchElementException => println("Bad path name: " + pathName)
       }
-      wikiDML += subjwikiDML
+     // wikiDML += subjwikiDML
+      deletes+=deletesForSubject
 
     }
 
@@ -742,10 +754,13 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Resolve INSERTs
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    for ((subject, quads) <- groupedUpdate._2)
-    {
 
-      val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
+
+    for ((subject, quads) <- groupedUpdate._2) //for each subject
+    {
+      val insertsForSubject =  new ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]]
+
+
 
       // download the page and do extraction of quads
       var title = subject.toString
@@ -773,10 +788,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
-      parser(page) match {
-        case Some(n) =>
 
-          for (update <- quads) {
+          for (update <- quads) // for each TP
+          {
+
+            val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
 
             val triple = update.asTriple
             val tSubject = triple.getSubject.toString
@@ -890,6 +906,9 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                   }
                 }
               }
+
+              insertsForSubject+=new Tuple2("[INSERT] "+update.getPredicate.toString()+" "+update.getObject.toString(),subjwikiDML)
+
             }
 
           }
@@ -897,12 +916,14 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         case None => Seq.empty
       }
 
+      //  wikiDML += subjwikiDML
+      inserts+=insertsForSubject
+
 
       wikiDML += subjwikiDML
     }
 
-    new Tuple2(wikiDML, titles)
-
+    new Tuple2(deletes,inserts)
   }
 
   /**

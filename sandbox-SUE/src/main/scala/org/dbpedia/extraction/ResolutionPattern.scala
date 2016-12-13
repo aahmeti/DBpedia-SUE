@@ -20,10 +20,14 @@ class ResolutionPattern (
     // .. or, "Mapping condition" -> induced ResPatter will include a WikiInsert / wikiDelete
     // ... or a particular TBox rule (e.g., disjointness /functionality)
 
+    val infobox:String,
+
     val property:String,
     val oldValue: String=null,
     val newValue: String=null,
     val operation: String) {
+
+
 
   override def toString(): String = {
     if (operation == "UPDATE")

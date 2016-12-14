@@ -1,15 +1,6 @@
 package com.wu.dbpediaupdate;
 
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,16 +15,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.dbpedia.extraction.destinations.Quad;
 import org.dbpedia.extraction.InfoboxSandboxCustom;
 import org.dbpedia.extraction.WikiDML;
 
-import scala.Tuple2;
-import scala.collection.Seq;
+import org.dbpedia.updateresolution.RDFUpdateResolver;
+
 import scala.collection.mutable.ArrayBuffer;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -97,7 +85,8 @@ public class ajaxCheckConsistency {
 		String localPathOntology = context.getRealPath(PATH_ONTOLOGY);
 		String localPathMappings = context.getRealPath(PATH_MAPPINGS);
 		
-		InfoboxSandboxCustom info = Init.getInfoboxSandboxCustom(); 
+		//InfoboxSandboxCustom info = Init.getInfoboxSandboxCustom();
+		RDFUpdateResolver resolver = Init.getRDFUpdateResolver();
 				//new InfoboxSandboxCustom(null,
 				//"_ambig.xml",null,null,null); // this
 								// worked
@@ -111,7 +100,8 @@ public class ajaxCheckConsistency {
 		Boolean ret=false;
 		try{
 			System.out.println("wikiupdates:"+wikiupdates);
-			info.checkConsistency(wikiupdates,null);
+			//info.checkConsistency(wikiupdates,null);
+			resolver.checkConsistency(wikiupdates,null);
 		}
 		catch (Exception e){
 		  e.printStackTrace(System.err);

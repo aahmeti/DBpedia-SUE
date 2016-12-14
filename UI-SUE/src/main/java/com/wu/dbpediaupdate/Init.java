@@ -5,8 +5,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import javax.ws.rs.core.Context;
 
+import org.dbpedia.updateresolution.RDFUpdateResolver;
 import org.dbpedia.extraction.InfoboxSandboxCustom;
 
 @WebListener
@@ -21,6 +21,7 @@ public class Init implements ServletContextListener {
 	@Inject
 	static String startMessage;
 	static InfoboxSandboxCustom info;
+	static RDFUpdateResolver resolver;
 
 	public Init() {
 
@@ -44,6 +45,9 @@ public class Init implements ServletContextListener {
 		info = new InfoboxSandboxCustom(null, ".xml", localPath,
 				localPathOntology, localPathMappings);
 
+		resolver = new RDFUpdateResolver(null,".xml", localPath,
+				localPathOntology, localPathMappings);
+
 		startMessage = "infoboxSandbox up!";
 		// ApplicationContext appCtx =
 		// WebApplicationContextUtils.getWebApplicationContext(event.getServletContext());
@@ -60,6 +64,9 @@ public class Init implements ServletContextListener {
 	}
 	public static InfoboxSandboxCustom getInfoboxSandboxCustom() {
 		return info;
+	}
+	public static RDFUpdateResolver getRDFUpdateResolver() {
+		return resolver;
 	}
 
 }

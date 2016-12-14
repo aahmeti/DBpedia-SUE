@@ -49,22 +49,4 @@ class TDBSerialiser
 
 }
 
-object TestTDBSerialiser {
-  def main(args: Array[String]): Unit = {
-
-    val test = new TDBSerialiser()
-
-    val quads = new ArrayBuffer[Quad]()
-
-    val homepageProperty = new OntologyProperty("Foaf:homepage", Map(Language.English -> "homepage"), Map(), null, null, false, Set(), Set())
-    val quad1 = new Quad(null, null, "TestPage", homepageProperty , "http://example.com", null, null)
-
-    quads += quad1
-
-    test.store(quads)
-
-    test.query("SELECT * WHERE {}")
-  }
-}
-
 

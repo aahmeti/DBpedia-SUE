@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>at.ac.wu</groupId>
-    <artifactId>infoboxsandbox</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>updatetranslator</artifactId>
+    <version>0.1</version>
     <inceptionYear>2016</inceptionYear>
     <packaging>jar</packaging>
 

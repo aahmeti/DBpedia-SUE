@@ -2,9 +2,6 @@ package org.dbpedia.extraction
 
 import org.dbpedia.extraction.destinations.Quad
 
-/**
-  * Created by Vadim on 09.11.2016.
-  */
 class ResolutionPattern (
     val wikiPage: String, // should be URI, what is a relevant datatype
     var wikiDelete: Seq[Quad], // each triple represents a deleted Wiki property
@@ -19,8 +16,6 @@ class ResolutionPattern (
     //e.g. Axiom would be "Infobox Key Constraint"
     // .. or, "Mapping condition" -> induced ResPatter will include a WikiInsert / wikiDelete
     // ... or a particular TBox rule (e.g., disjointness /functionality)
-
-    val infobox:String,
 
     val property:String,
     val oldValue: String=null,

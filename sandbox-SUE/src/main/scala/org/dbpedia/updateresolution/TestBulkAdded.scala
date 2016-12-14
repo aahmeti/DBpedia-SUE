@@ -12,7 +12,7 @@ object TestBulkAdded {
     //  Start with no infobox and general mapping (no prefix)
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
 
     val filewithInserts = "./data/updates/added.nt"
@@ -62,6 +62,7 @@ object TestBulkAdded {
         try{
           var result = test.updateFromUpdateQuery(atomicUpdate)
 
+          /*
           println("count: "+result._1(0).size)
           if (result._1(0).size>0) {
             countresolvedWikiDMLupdates += 1
@@ -74,6 +75,7 @@ object TestBulkAdded {
               countresolvedNOTUNIQWikiDMLupdates+=1
               countresolvedalternativeAccommodationsWikiDMLupdates+=result._1(0).size
             }
+
           }
           else {
             countNOTresolvedWikiDMLupdate += 1
@@ -81,6 +83,7 @@ object TestBulkAdded {
               countTypeInsertNOTResolved+=1
           }
           println(result)
+          */
         }
         catch {
           case _: NoSuchElementException => {

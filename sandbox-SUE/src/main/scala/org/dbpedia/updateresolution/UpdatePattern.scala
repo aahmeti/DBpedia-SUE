@@ -1,19 +1,19 @@
 package org.dbpedia.updateresolution
 
+import org.dbpedia.extraction.WikiDML
 import org.dbpedia.extraction.destinations.Quad
 
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, HashSet, Set}
 
-class UpdatePattern (
-        val infoboxType: String, // should be URI, what is a relevant datatype
-        val wikiDelete: Buffer[Quad] = ArrayBuffer[Quad](), // each triple represents a deleted Wiki property
-        val wikiInsert: Buffer[Quad] = ArrayBuffer[Quad](), // each triple represents an inserted Wiki property using variables
-        val rdfDelete: Buffer[Quad] = ArrayBuffer[Quad](), // deleted dbpedia triples
-        val rdfInsert: Buffer[Quad] = ArrayBuffer[Quad](), // inserted dbpedia triples using variable
-        val origin: String = UpdatePattern.RDF_INSERT,
-        val inducedReason: InducedUpdateReason=null,
-        val inducedBy: UpdatePattern=null)
+case class UpdatePattern (
+        var infoboxType: String = null, // should be URI, what is a relevant datatype
+         wikiDelete: Set[Quad] = HashSet[Quad](), // each triple represents a deleted Wiki property
+         wikiInsert: Set[Quad] = HashSet[Quad](), // each triple represents an inserted Wiki property using variables
+         rdfDelete: Set[Quad] = HashSet[Quad](), // deleted dbpedia triples
+         rdfInsert: Set[Quad] = HashSet[Quad](), // inserted dbpedia triples using variable
+         origin: String = UpdatePattern.RDF_INSERT,
+         inducedReason: InducedUpdateReason=null,
+         inducedBy: UpdatePattern=null)
   {
   override def toString(): String = toString(x=>x)
 
@@ -26,11 +26,10 @@ class UpdatePattern (
       case UpdatePattern.WIKI_DELETE => (wikiDelete,rdfDelete,UpdatePattern.RDF_DELETE)
     }
 
-    to.appendAll(
-      if( to.isEmpty )
-        from.foldLeft(Seq.empty[Quad])((qs, quad)=>qs :+ quad.copy(predicate=propMap(quad.predicate),context=newctx) )
+    { if (to.isEmpty)
+        from.foldLeft(Seq.empty[Quad])((qs, quad) => qs :+ quad.copy(predicate = propMap(quad.predicate), context = newctx))
       else Seq.empty[Quad]
-    )
+    }.foreach( x => to.add(x) )
   }
 
   def toString( f: String => String ): String = {
@@ -73,41 +72,27 @@ object UpdatePattern {
   val RDF_INSERT = "RDFInsert"
   val RDF_DELETE = "RDFDelete"
 
-  def wd(property:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, freshVar, WIKI_DELETE, STRING)
-    new UpdatePattern(PAGE, wikiDelete=ArrayBuffer(q))
-  }
-  def wd(property:String, value:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, value, WIKI_DELETE, STRING)
-    new UpdatePattern(PAGE, wikiDelete=ArrayBuffer(q))
-  }
+  def wd(property:String ) = new Quad(LANGUAGE, null, PAGE, property, freshVar, WIKI_DELETE, STRING)
+  def wd(property:String, value:String ) = new Quad(LANGUAGE, null, PAGE, property, value, WIKI_DELETE, STRING)
+  def wdp(property:String ) = new UpdatePattern(PAGE, wikiDelete=HashSet(wd(property)))
+  def wdp(property:String, value:String ) = new UpdatePattern(PAGE, wikiDelete=HashSet(wd(property,value)))
 
-  def rd(property:String) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, freshVar, RDF_DELETE, STRING)
-    new UpdatePattern(PAGE, rdfDelete=ArrayBuffer(q))
-  }
-  def rd(property:String, objct: String) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, objct, RDF_DELETE, STRING)
-    new UpdatePattern(PAGE, rdfDelete = ArrayBuffer(q))
-  }
 
-  def wi(property:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, freshVar, WIKI_INSERT, STRING)
-    new UpdatePattern(PAGE, wikiInsert=ArrayBuffer(q))
-  }
-  def wi(property:String, value:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, value, WIKI_INSERT, STRING)
-    new UpdatePattern(PAGE, wikiInsert=ArrayBuffer(q))
-  }
+  def rd(property:String) = new Quad(LANGUAGE, null, PAGE, property, freshVar, RDF_DELETE, STRING)
+  def rd(property:String, objct: String) = new Quad(LANGUAGE, null, PAGE, property, objct, RDF_DELETE, STRING)
+  def rdp(property:String) = new UpdatePattern(PAGE, rdfDelete=HashSet(rd(property)))
+  def rdp(property:String, objct: String) = new UpdatePattern(PAGE, rdfDelete = HashSet(rd(property,objct)))
 
-  def ri(property:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, freshVar, RDF_INSERT, STRING)
-    new UpdatePattern(PAGE, rdfInsert=ArrayBuffer(q))
-  }
-  def ri(property:String, objct:String ) : UpdatePattern = {
-    val q = new Quad(LANGUAGE, null, PAGE, property, objct, RDF_INSERT, STRING)
-    new UpdatePattern(PAGE, rdfInsert=ArrayBuffer(q))
-  }
+  def wi(property:String ) = new Quad(LANGUAGE, null, PAGE, property, freshVar, WIKI_INSERT, STRING)
+  def wi(property:String, value:String ) = new Quad(LANGUAGE, null, PAGE, property, value, WIKI_INSERT, STRING)
+  def wip(property:String ) = new UpdatePattern(PAGE, wikiInsert=HashSet(wi(property)))
+  def wip(property:String, value:String ) = new UpdatePattern(PAGE, wikiInsert=HashSet(wi(property,value)))
+
+  def ri(property:String) = new Quad(LANGUAGE, null, PAGE, property, freshVar, RDF_INSERT, STRING)
+  def ri(property:String, objct: String) = new Quad(LANGUAGE, null, PAGE, property, objct, RDF_INSERT, STRING)
+  def rip(property:String) = new UpdatePattern(PAGE, rdfInsert=HashSet(ri(property)))
+  def rip(property:String, objct: String) = new UpdatePattern(PAGE, rdfInsert = HashSet(ri(property,objct)))
+
 
   def toRdf( wikiQuad:Quad, rdfProperty:String ) = wikiQuad.copy(context = rdfContext(wikiQuad.context), predicate = rdfProperty)
   def toWiki( rdfQuad:Quad, wikiProperty:String ) = rdfQuad.copy(context = wikiContext(rdfQuad.context), predicate = wikiProperty)
@@ -131,4 +116,48 @@ object UpdatePattern {
       case _ => null
     }
   }
+
+  def fromWikiDML( dml: WikiDML ) : UpdatePattern = fromWikiDMLs(Seq(dml))
+
+  def fromWikiDMLs( dmls: Seq[WikiDML] ) : UpdatePattern = {
+    val up = new UpdatePattern()
+
+    dmls.foreach(dml => {
+      val (d,i) = wikiDMLToQuadPair(dml)
+      d match {
+        case Some(q) => up.wikiDelete.add(q)
+        case None =>
+      }
+      i match {
+        case Some(q) => up.wikiInsert.add(q)
+        case None =>
+      }
+    })
+
+    up
+  }
+
+  def wikiDMLToQuadPair( dml: WikiDML ) : (Option[Quad],Option[Quad]) = {
+    dml.operation match {
+      case "DELETE" => (Some(wd(dml.property,dml.oldValue)),None)
+      case "INSERT" => (None, Some(wi(dml.property,dml.newValue)))
+      case "UPDATE" => (Some(wd(dml.property,dml.oldValue)), Some(wi(dml.property,dml.newValue)))
+      case _ => (None, None)
+    }
+  }
+
+  def merge (ps : Seq[UpdatePattern]) : UpdatePattern = {
+    if(ps.isEmpty) null
+    else
+      new UpdatePattern(infoboxType = ps.head.infoboxType
+        , wikiDelete = Set() ++ ps.map( {x => x.wikiDelete} ).flatten
+        , wikiInsert = Set() ++ ps.map( {x => x.wikiInsert} ).flatten
+        , rdfDelete = Set() ++ ps.map( {x => x.rdfDelete} ).flatten
+        , rdfInsert = Set() ++ ps.map( {x => x.rdfInsert} ).flatten
+      )
+  }
+
+  def product[A](xs: Traversable[Traversable[A]]): Seq[Seq[A]] =
+      xs.foldLeft(Seq(Seq.empty[A])){
+        (x, y) => for (a <- x.view; b <- y) yield a :+ b }
 }

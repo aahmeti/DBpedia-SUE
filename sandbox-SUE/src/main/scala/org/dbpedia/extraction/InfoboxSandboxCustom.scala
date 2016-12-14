@@ -24,6 +24,7 @@ import wikiPropertiesRecommendation.WikiTemplateManager
 import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream.Empty
 import scala.io.Source
+
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, HashMap, MultiMap, Set}
 import scalax.file.Path
@@ -85,7 +86,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   private val contextMappings = new {
-   // println("context create!")
+    // println("context create!")
     val mappings: Mappings = MappingsLoader.load(context)
     val temp=mappings.templateMappings
     val redirects: Redirects = new Redirects(Map())
@@ -108,21 +109,21 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   def resolveForLanguageFromUI() = {
-   // println("download_directory:" + download_directory + "/Santi_Cazorla/705145701.xml")
+    // println("download_directory:" + download_directory + "/Santi_Cazorla/705145701.xml")
     val testDataRootDir = new File(download_directory + "/Santi_Cazorla/705145701.xml")
     resolveForLanguage(testDataRootDir, Language.English)
   }
 
   /**
-   * Resolves a ground update to a set of sets of WikiDMLs
+    * Resolves a ground update to a set of sets of WikiDMLs
     *
     * @param file wiki page
-   * @param _language langage of mappings
-   * @return
-   */
+    * @param _language langage of mappings
+    * @return
+    */
   def resolveForLanguage(file: File, _language: Language) = {
 
-  //  println("tesft file " + file.getName())
+    //  println("tesft file " + file.getName())
 
     val ontoFilePath = ontologyPath
     val ontoFile = new File(ontoFilePath)
@@ -161,12 +162,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Main entry function: Renders a wiki page to a set of Quads
+    * Main entry function: Renders a wiki page to a set of Quads
     *
     * @param file wiki page
-   * @param _language language of the mappings
-   * @return Set of Quads
-   */
+    * @param _language language of the mappings
+    * @return Set of Quads
+    */
   def renderWithChangesForLanguage(file: File, _language: Language): Seq[Quad] = {
 
     //println("test file " + file.getName())
@@ -199,27 +200,27 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Renders a wiki page to a set of Quads
+    * Renders a wiki page to a set of Quads
     *
     * @param file the wiki page
-   * @param context the mappings and ontology
-   * @param folder folder of the wiki page
-   * @return
-   */
+    * @param context the mappings and ontology
+    * @param folder folder of the wiki page
+    * @return
+    */
   private def renderWithChanges(file: String, context: AnyRef {def ontology: Ontology; def language: Language; def redirects: Redirects; def mappingPageSource: Traversable[WikiPage]}, folder: File): Seq[Quad] = {
     var result: Seq[Quad] = Seq.empty
-/*
-    val contextMappings = new {
-      def mappings: Mappings = MappingsLoader.load(context)
+    /*
+        val contextMappings = new {
+          def mappings: Mappings = MappingsLoader.load(context)
 
-      def redirects: Redirects = new Redirects(Map())
-    }
+          def redirects: Redirects = new Redirects(Map())
+        }
 
-    val extractor = new MappingExtractor(contextMappings)
-*/
+        val extractor = new MappingExtractor(contextMappings)
+    */
     //    println("input file : " + folder + "/" + file)
     val page = //new FileSource(folder, context.language, _ endsWith file).head
-      XMLSource.fromFile(new File(folder.getPath()), context.language).head
+    XMLSource.fromFile(new File(folder.getPath()), context.language).head
     println("resourceIri : " + page.title.resourceIri)
 
     parser(page) match {
@@ -233,12 +234,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Main entry function: Renders a wiki page to a set of Quads
+    * Main entry function: Renders a wiki page to a set of Quads
     *
     * @param file wiki page
-   * @param _language language of the mappings
-   * @return Set of Quads
-   */
+    * @param _language language of the mappings
+    * @return Set of Quads
+    */
   def renderForLanguage(file: File, _language: Language): Seq[Quad] = {
 
     //println("test file " + file.getName())
@@ -271,13 +272,13 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Renders a wiki page to a set of Quads
+    * Renders a wiki page to a set of Quads
     *
     * @param file the wiki page
-   * @param context the mappings and ontology
-   * @param folder folder of the wiki page
-   * @return
-   */
+    * @param context the mappings and ontology
+    * @param folder folder of the wiki page
+    * @return
+    */
   private def render(file: String, context: AnyRef {def ontology: Ontology; def language: Language; def redirects: Redirects; def mappingPageSource: Traversable[WikiPage]}, folder: File): Seq[Quad] = {
     var result: Seq[Quad] = Seq.empty
 
@@ -291,7 +292,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 */
     //    println("input file : " + folder + "/" + file)
     val page = //new FileSource(folder, context.language, _ endsWith file).head
-      XMLSource.fromFile(new File(folder.getPath()), context.language).head
+    XMLSource.fromFile(new File(folder.getPath()), context.language).head
     println("resourceIri : " + page.title.resourceIri)
 
     parser(page) match {
@@ -307,13 +308,13 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
   /**
-   * Resolves a ground triple Tuple4 of an instantiated SPARQL update
+    * Resolves a ground triple Tuple4 of an instantiated SPARQL update
     *
     * @param file the name of the file of the wiki page
-   * @param context mappings fixme: no need for ontology?
-   * @param folder the folder of the file
-   * @return a Set of Sets of WikiDMLs
-   */
+    * @param context mappings fixme: no need for ontology?
+    * @param folder the folder of the file
+    * @return a Set of Sets of WikiDMLs
+    */
   private def resolver(file: String, context: AnyRef {def ontology: Ontology; def language: Language; def redirects: Redirects; def mappingPageSource: Traversable[WikiPage]}, folder: File): ArrayBuffer[Seq[WikiDML]] = {
 
     val wikiDML = new ArrayBuffer[Seq[WikiDML]]
@@ -322,21 +323,21 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     // Loading mappings and redirects
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-   /* val contextMappings = new {
-      def mappings: Mappings = MappingsLoader.load(context)
+    /* val contextMappings = new {
+       def mappings: Mappings = MappingsLoader.load(context)
 
-      def redirects: Redirects = new Redirects(Map())
-    }
+       def redirects: Redirects = new Redirects(Map())
+     }
 
-    val extractor = new MappingExtractor(contextMappings)
-*/
+     val extractor = new MappingExtractor(contextMappings)
+ */
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Loading a page from a XML file
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     //    println("input file : " + folder + "/" + file)
     val page =
-      XMLSource.fromFile(new File(folder.getPath()), context.language).head
+    XMLSource.fromFile(new File(folder.getPath()), context.language).head
     //    println("resourceIri : " + page.title.resourceIri)
 
     parser(page) match {
@@ -454,7 +455,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
               for (i <- 0 until infoboxProperties.size) {
                 for (j <- i + 1 until infoboxProperties.size) {
                   if (!infobox.keySet.contains(infoboxProperties(i).property) &&
-                            infobox.keySet.contains(infoboxProperties(j).property))
+                    infobox.keySet.contains(infoboxProperties(j).property))
                     gaps(i) += 1
                 }
               }
@@ -478,11 +479,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     val infoboxCount = new scala.collection.mutable.HashMap[String, Int]
 
     // initialize infoboxKeys with 0s
-   /* for (wikiDML <- infoboxProperties) {
-      infoboxCount += (wikiDML.infobox + ":" + wikiDML.property -> 0) // this is what we need to count and return
-      if (!infoboxTitles.contains(wikiDML.infobox.toUpperCase))
-        infoboxTitles += wikiDML.infobox.toUpperCase
-    }*/
+    /* for (wikiDML <- infoboxProperties) {
+       infoboxCount += (wikiDML.infobox + ":" + wikiDML.property -> 0) // this is what we need to count and return
+       if (!infoboxTitles.contains(wikiDML.infobox.toUpperCase))
+         infoboxTitles += wikiDML.infobox.toUpperCase
+     }*/
 
     // println("Counting Infobox properties...")
     for (title <- titles) {
@@ -510,12 +511,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
           case Some(node) =>
 
             val infoboxes = collectTemplates(node)
-           // val filteredInfoboxes = infoboxes.filter(x => infoboxTitles.contains(x.title.decoded.toUpperCase)) // filter infoboxes by subject
+            // val filteredInfoboxes = infoboxes.filter(x => infoboxTitles.contains(x.title.decoded.toUpperCase)) // filter infoboxes by subject
             println(infoboxes.size)
             for (infobox <- infoboxes) {
               for (k <- infobox.keySet) {
                 for (p<- infobox.property(k)) {
-                 println(p.toWikiText)
+                  println(p.toWikiText)
                   if (p.toWikiText.contains(property)) {
                     infoboxCount(k) += 1
                   }
@@ -547,7 +548,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
         infoboxTitles += wikiDML.infobox.toUpperCase
     }
 
-   // println("Counting Infobox properties...")
+    // println("Counting Infobox properties...")
     for (title <- titles) {
       println(title)
 
@@ -696,8 +697,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
     for ((subject, quads) <- groupedUpdate._1) { //for each subject
-      // take deletes
-     val deletesForSubject =  new ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]] //TPs-> options->consequences per TP
+    // take deletes
+    val deletesForSubject =  new ArrayBuffer[Tuple2[String,ArrayBuffer[Seq[WikiDML]]]] //TPs-> options->consequences per TP
 
 
 
@@ -744,12 +745,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       catch {
         case _: NoSuchElementException => println("Bad path name: " + pathName)
       }
-     // wikiDML += subjwikiDML
+      // wikiDML += subjwikiDML
       deletes+=deletesForSubject
 
     }
 
-   // println("Resolve INSERTs")
+    // println("Resolve INSERTs")
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Resolve INSERTs
@@ -782,126 +783,152 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       // println("Create Logic")
       val extractLogic = new ExtractLogic
 
+      try
+      {
 
-      // println("Extract Logic")
-      val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
+        // println("Extract Logic")
+        val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
 
-      val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
+        val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
+        parser(page) match
+        {
+          case Some(n) =>
 
-          for (update <- quads) // for each TP
-          {
+            for (update <- quads) // for each TP
+            {
 
-            val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
+              val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
 
-            val triple = update.asTriple
-            val tSubject = triple.getSubject.toString
-            val tPredicate = triple.getPredicate.toString
-            val tObject = triple.getObject.toString
+              val triple = update.asTriple
+              val tSubject = triple.getSubject.toString
+              val tPredicate = triple.getPredicate.toString
+              val tObject = triple.getObject.toString
 
-            // println("For each templateMapping")
-            // for (templateMapping <- contextMappings.mappings.templateMappings) {
-            for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
-            ) {
-              //println("insider")
-              if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
+              // println("For each templateMapping")
+              // for (templateMapping <- contextMappings.mappings.templateMappings) {
+              for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
+              )
+              {
+                //println("insider")
+                if (templateMapping._2.isInstanceOf[ConditionalMapping])
+                {
 
-                for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
+                  for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size)
+                  {
 
-                  val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
+                    val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
 
-                  for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings) {
+                    for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings)
+                    {
 
-                    if (propertyMapping.isInstanceOf[ConstantMapping]) {
+                      if (propertyMapping.isInstanceOf[ConstantMapping])
+                      {
 
-                      if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == tPredicate)
-                        && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject)) {
+                        if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == tPredicate)
+                          && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject))
+                        {
 
-                        for {template <- collectTemplates(n)
-                             resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                        } {
-                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase) {
+                          for {template <- collectTemplates(n)
+                               resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                          }
+                          {
+                            if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                            {
 
-                            // TODO: other conditions here
-                            val condDML = new ArrayBuffer[WikiDML]
-                            if (condCase.operator == "isSet") {
+                              // TODO: other conditions here
+                              val condDML = new ArrayBuffer[WikiDML]
+                              if (condCase.operator == "isSet")
+                              {
 
-                              condDML += new WikiDML(n.title.decoded, resolvedTitle, condCase.templateProperty, newValue = placeholder, operation = "INSERT")
+                                condDML += new WikiDML(n.title.decoded, resolvedTitle, condCase.templateProperty, newValue = placeholder, operation = "INSERT")
 
-                              for (j <- 0 until i) {
+                                for (j <- 0 until i)
+                                {
 
-                                val condDisabled = templateMapping._2.asInstanceOf[ConditionalMapping].cases(j)
+                                  val condDisabled = templateMapping._2.asInstanceOf[ConditionalMapping].cases(j)
 
-                                condDML += new WikiDML(n.title.decoded, resolvedTitle, condDisabled.templateProperty, operation = "DELETE")
+                                  condDML += new WikiDML(n.title.decoded, resolvedTitle, condDisabled.templateProperty, operation = "DELETE")
+
+                                }
 
                               }
 
-                            }
+                              subjwikiDML += condDML.toList
 
-                            subjwikiDML += condDML.toList
+                            }
 
                           }
 
                         }
+                      }
+                      // end of "if" constant mapping
+
+                    }
+                    // end of "for" all mappings in conditional case
+                  }
+                  // end of "for" all cases in conditional mappings
+                }
+                // end of "if" mapping is conditional mapping
+
+                if (templateMapping._2.isInstanceOf[TemplateMapping])
+                {
+
+                  for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings)
+                  {
+
+                    if (mapping.isInstanceOf[SimplePropertyMapping])
+                    {
+
+                      // TODO: ConstantMapping?
+                      val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
+                      val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
+
+                      if (ontologyProperty.uri == tPredicate)
+                      {
+
+                        for {
+                          template <- collectTemplates(n)
+                          resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                        }
+                        {
+                          //println(templateMapping._1 + " == " + resolvedTitle)
+                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                            subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
+                        }
 
                       }
                     }
-                    // end of "if" constant mapping
-
-                  }
-                  // end of "for" all mappings in conditional case
-                }
-                // end of "for" all cases in conditional mappings
-              }
-              // end of "if" mapping is conditional mapping
-
-              if (templateMapping._2.isInstanceOf[TemplateMapping]) {
-
-                for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings) {
-
-                  if (mapping.isInstanceOf[SimplePropertyMapping]) {
-
-                    // TODO: ConstantMapping?
-                    val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
-                    val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
-
-                    if (ontologyProperty.uri == tPredicate) {
-
-                      for {
-                        template <- collectTemplates(n)
-                        resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                      } {
-                        //println(templateMapping._1 + " == " + resolvedTitle)
-                        if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                          subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
-                      }
-
-                    }
                   }
                 }
-              }
 
-              if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
-                for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings) {
+                if (templateMapping._2.isInstanceOf[ConditionalMapping])
+                {
+                  for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings)
+                  {
 
-                  if (mapping.isInstanceOf[SimplePropertyMapping]) {
+                    if (mapping.isInstanceOf[SimplePropertyMapping])
+                    {
 
-                    val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
-                    val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
+                      val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
+                      val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
 
-                    // println(templateProperty + " --> " + ontologyProperty)
+                      // println(templateProperty + " --> " + ontologyProperty)
 
-                    if (ontologyProperty.uri == tPredicate) {
+                      if (ontologyProperty.uri == tPredicate)
+                      {
 
-                      //               println(collectTemplates(n).size)
-                      for {template <- collectTemplates(n)
-                           resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                      } {
-                        //println(templateMapping._1 + " == " + resolvedTitle)
-                        if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                          subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
+                        //               println(collectTemplates(n).size)
+                        for {template <- collectTemplates(n)
+                             resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                        }
+                        {
+                          //println(templateMapping._1 + " == " + resolvedTitle)
+                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                            subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
+                        }
+
                       }
-
                     }
                   }
                 }
@@ -911,27 +938,26 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
             }
 
-          }
-
-        case None => Seq.empty
+          case None => Seq.empty
+        }
       }
 
       //  wikiDML += subjwikiDML
       inserts+=insertsForSubject
 
 
-      wikiDML += subjwikiDML
     }
-
+    // new Tuple2(wikiDML, titles)
     new Tuple2(deletes,inserts)
+
   }
 
   /**
-   * Collects all templates from a page
+    * Collects all templates from a page
     *
     * @param node
-   * @return
-   */
+    * @return
+    */
   private def collectTemplates(node: Node): List[TemplateNode] = {
     node match {
       case templateNode: TemplateNode => List(templateNode)
@@ -963,11 +989,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * fixme: Calculates the triples which are deleted and inserted
+    * fixme: Calculates the triples which are deleted and inserted
     *
     * @param wikiUpdate
-   * @return
-   */
+    * @return
+    */
   def getDiffFromInfoboxUpdate(wikiUpdate: Seq[WikiDML], wikiPage: String = null) = {
     //println("getDiffFromInfoboxUpdate")
     var oldView = new ArrayBuffer[Quad]()
@@ -1034,11 +1060,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
   /**
-   * Groups a SPARQL update by subject
+    * Groups a SPARQL update by subject
     *
     * @param update
-   * @return a Tuple2 of deletes and inserts
-   */
+    * @return a Tuple2 of deletes and inserts
+    */
   def groupUpdateBySubject(update: UpdateRequest) = {
 
     val subjectGroupsDEL = new HashMap[com.hp.hpl.jena.graph.Node, Set[com.hp.hpl.jena.sparql.core.Quad]]
@@ -1072,10 +1098,10 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Loads Ontology of DBpedia and Mappings which use the former
+    * Loads Ontology of DBpedia and Mappings which use the former
     *
     * @return contextMappings
-   */
+    */
   def loadOntologyAndMappings() = {
 
     val ontoFilePath = ontologyPath
@@ -1197,7 +1223,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       val sb = new StringBuilder()
 
       for (quad <- result) {
-         sb.append( t.render(quad) )
+        sb.append( t.render(quad) )
       }
 
       model.read( new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), null, "N3" )
@@ -1243,7 +1269,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     var extractedQuads: Seq[Quad] = Seq.empty
 
     val folder = new File(download_directory)
-   // val contextMappings = loadOntologyAndMappings()
+    // val contextMappings = loadOntologyAndMappings()
 
     val pathName = folder.getPath() + "/" + sTitle
     val newPath: Path = Path.fromString(pathName)
@@ -1259,7 +1285,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       val page = XMLSource.fromFile(new File(download_directory + "/" + sTitle + "/" + revID + ".xml"), Language.English).head
 
-    //  val extractor = new MappingExtractor(contextMappings)
+      //  val extractor = new MappingExtractor(contextMappings)
       //  @Javi> mappings are in extractor, under templateMappings = context.mappings.templateMappings.
       parser(page) match {
         case Some(n) =>
@@ -1303,7 +1329,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
       val page = XMLSource.fromFile(new File(download_directory + "/" + sTitle + "/" + revID + ".xml"), Language.English).head
 
-     // val extractor = new MappingExtractor(contextMappings)
+      // val extractor = new MappingExtractor(contextMappings)
       //  @Javi> mappings are in extractor, under templateMappings = context.mappings.templateMappings.
       parser(page) match {
         case Some(n) =>
@@ -1323,11 +1349,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
   /**
-   * Checks if SPARQL update is consistent or not
+    * Checks if SPARQL update is consistent or not
     *
     * @param update
-   * @return true if update is consistent
-   */
+    * @return true if update is consistent
+    */
 
   def checkConsistency(update: UpdateRequest): Boolean = {
 
@@ -1544,7 +1570,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   {
 
     val subjType = getSubjectType(subjectDbpedia)
-   // println(subjType)
+    // println(subjType)
     val rs = getQueryResultsFromDBpedia(subjType.toString)
 
     val resType = new ArrayBuffer[String]()
@@ -1570,7 +1596,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       while (rs.hasNext()) {
 
         val sol = rs.nextSolution.get("?Y").toString
-       // println("Solution: "+sol)
+        // println("Solution: "+sol)
         val title = sol.substring(sol.lastIndexOf("/") + 1)
         if (!subjects.contains(title))
           subjects += title
@@ -1587,7 +1613,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   def getSubjectType(subject:String) = {
 
-   // val res = ArrayBuffer[String]()
+    // val res = ArrayBuffer[String]()
 
     val dataset = "SELECT DISTINCT ?Y \n" +
       "WHERE { " + subject + " a ?Y  . }"
@@ -1608,7 +1634,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
     var dataset = "SELECT DISTINCT ?Y \n" +
-                  "WHERE { "
+      "WHERE { "
 
     for (cType <- classType)
     {
@@ -1616,7 +1642,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     }
 
     dataset += "?Y <" + predicate + "> ?Z2 . \n" +
-            "} ORDER BY RAND() LIMIT " + limit
+      "} ORDER BY RAND() LIMIT " + limit
 
     res += dataset
 
@@ -1626,8 +1652,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
   def getQueryForResourcesWithSamePredicates(limit: Int, predicate: String, classType: String) = {
 
-//    val groupedAtomicUpdate = groupUpdateBySubject(update)
-//    val inserts = groupedAtomicUpdate._2
+    //    val groupedAtomicUpdate = groupUpdateBySubject(update)
+    //    val inserts = groupedAtomicUpdate._2
 
     val res = ArrayBuffer[String]()
 
@@ -1678,11 +1704,11 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
   }
 
   /**
-   * Instantiates a general SPARQL update -- Where clause to live dbpedia
+    * Instantiates a general SPARQL update -- Where clause to live dbpedia
     *
     * @param update
-   * @return Ground update
-   */
+    * @return Ground update
+    */
   def instantiateGeneralUpdate(update: UpdateRequest): UpdateRequest = {
 
     val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
@@ -1754,12 +1780,12 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
 
   /**
-   * Transforms an update to a set of tuples of length 4, for both delete and insert
-   * Tuple4(subject, predicate, object, operation)
+    * Transforms an update to a set of tuples of length 4, for both delete and insert
+    * Tuple4(subject, predicate, object, operation)
     *
     * @param update
-   * @return a Tuple2 for both delete and insert
-   */
+    * @return a Tuple2 for both delete and insert
+    */
   def getGroundTriplesFromUpdate(update: UpdateRequest) = {
 
     var delTriples = new ArrayBuffer[Tuple4[java.lang.String, java.lang.String, java.lang.String, java.lang.String]]
@@ -1826,7 +1852,5 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     return rs
 
   }
-
-
 
 }

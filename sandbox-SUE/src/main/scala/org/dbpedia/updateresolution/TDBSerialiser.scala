@@ -34,7 +34,6 @@ class TDBSerialiser {
 
     model.read( new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), null, "N3" )
 
-
   }
 
 }

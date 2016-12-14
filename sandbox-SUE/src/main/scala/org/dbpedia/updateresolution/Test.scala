@@ -12,28 +12,15 @@ import org.dbpedia.extraction.util.Language
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
- * Created by aahmeti on 28/10/2016.
- */
-class Test {
-
-
-
-}
-
-
 object TestGroundTriplesFromUpdate {
 
   def main(args: Array[String]): Unit = {
 
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
-    val test = new InfoboxSandboxCustom(null, "")
-    val ans = test.getGroundTriplesFromUpdate(update)
-
-    for (del <- ans._1) println(del)
-    for (ins <- ans._2) println(ins)
-
+    val (ds,is) = RDFUpdateResolver.getGroundTriplesFromUpdate(update)
+    ds.foreach(println _)
+    is.foreach(println _)
   }
 
 }
@@ -45,7 +32,7 @@ object TestLocalConsistencyCheck {
     val testDataRootDir = new File("./data/downloads/Santi_Cazorla/709848090.xml") // no need for this, subject is taken from update
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
       new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "playername", newValue = "Santi CZ", operation = "INSERT"),
@@ -70,14 +57,12 @@ object TestGetMappingFromSubject {
     val testDataRootDir = null // no need for this, subject is taken from update
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val title = "Santi_Cazorla"
 
     test.getMappingType(title)
-
   }
-
 }
 
 
@@ -88,7 +73,7 @@ object TestConsistencyCheck {
     val testDataRootDir = new File("./data/downloads/Thierry_Henry/test") // no need for this, subject is taken from update
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -109,7 +94,7 @@ object TestInfoboxCount {
 
     val testDataRootDir = null
     val mappingFileSuffix = "_ambig.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val titles = Seq("Santi_Cazorla", "Thierry_Henry")
 
@@ -131,7 +116,7 @@ object TestInfoboxCountFootballPlayersStats {
 
     val testDataRootDir = null
     val mappingFileSuffix = "_ambig.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val filePath = "/ISWC/english-players.xml"
     val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -220,7 +205,7 @@ object TestInfoboxCountClubsStats {
 
     val testDataRootDir = null
     val mappingFileSuffix = "_ambig.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val filePath = "/ISWC/english-teams.xml"
     val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -245,7 +230,7 @@ object TestInfoboxCountCitiesStats {
 
     val testDataRootDir = null
     val mappingFileSuffix = "_ambig.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val filePath = "/ISWC/english-settlements.xml"
     val title = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."))
@@ -367,7 +352,7 @@ object TestResourcesWithSimilarProperties {
 
     val testDataRootDir = null
     val mappingFileSuffix = "_ambig.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01.ru"))
 
@@ -384,7 +369,7 @@ object TestInfoboxPropertyGaps {
 
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia04.ru"))
 
@@ -410,7 +395,7 @@ object TestInfoboxPropertyGaps {
 
     for (query <- queries) {
 
-      val rs = test.getQueryResultsFromDBpedia(query)
+      val rs = RDFUpdateResolver.queryDBpedia(query)
 
       while (rs.hasNext()) {
 
@@ -427,6 +412,7 @@ object TestInfoboxPropertyGaps {
 
     val newInfoboxProperties = new ArrayBuffer[WikiDML]()
 
+    /*
     // flatten wikiDMLs
     val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
 
@@ -435,6 +421,7 @@ object TestInfoboxPropertyGaps {
       if (infobox.property.startsWith("twin") && !infobox.property.equals("twins"))
         newInfoboxProperties += infobox
     }
+    */
 
     test.countInfoboxPropertiesWithGaps(subjects, newInfoboxProperties)
 
@@ -458,19 +445,19 @@ object TestNewStatisticsFromUI {
     //the update comes from the UI
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
-    var updateStr = "./data/updates/changeInfoboxPerson.ru"
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
+    val updateStr = "./data/updates/changeInfoboxPerson.ru"
     //var updateStr = "./data/updates/dbpedia01.ru"
     //var updateStr = "./data/updates/changeTaxobox.ru"
     val update = UpdateFactory.create(UtilFunctions.readFile(updateStr))
     val wikiDMLs = test.resolveUpdate(update)
 
     // flatten wikiDMLs
-    val setWikiDML = wikiDMLs._1.toSeq.flatten
+ //   val setWikiDML = wikiDMLs._1.toSeq.flatten
 
 
     // this is the call from the UI, i.e., subject in Dbpedia, Predicate in Dbpedia and wiki alternatives
-    println(test.getStatResultsAlternatives(subject,predicate,sample,setWikiDML))
+ //   println(test.getStatResultsAlternatives(subject,predicate,sample,setWikiDML))
 
   }
 
@@ -482,7 +469,7 @@ object TestStatistics {
 
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     // defaults
     var updateStr = "./data/updates/dbpedia04.ru"
@@ -518,7 +505,7 @@ object TestStatistics {
 
     for (query <- queries) {
 
-      val rs = test.getQueryResultsFromDBpedia(query)
+      val rs = RDFUpdateResolver.queryDBpedia(query)
 
       while (rs.hasNext()) {
 
@@ -534,9 +521,9 @@ object TestStatistics {
     val wikiDMLs = test.resolveUpdate(update)
 
     // flatten wikiDMLs
-    val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
+//    val setWikiDML = wikiDMLs._1.toSeq.flatten.flatten
 
-    println(test.countInfoboxProperties(subjects, setWikiDML))
+//    println(test.countInfoboxProperties(subjects, setWikiDML))
 
   }
 
@@ -549,7 +536,7 @@ object TestUpdate {
     //  Start with no infobox and general mapping (no prefix)
     val testDataRootDir = null
     val mappingFileSuffix = ".xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     //  Instantiate General update to DBpedia and Group it by Subject
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia04.ru"))
@@ -558,7 +545,7 @@ object TestUpdate {
     var atomicUpdate: UpdateRequest = null
     if (updateMod.getWherePattern.toString.contains("?")) {
       // general update contains one variable at least
-      atomicUpdate = test.instantiateGeneralUpdate(update)
+      atomicUpdate = RDFUpdateResolver.instantiateGeneralUpdate(update)
     }
     else
       atomicUpdate = update
@@ -580,7 +567,7 @@ object TestUpdateSemantics {
     // mappings
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     // update
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
@@ -602,19 +589,18 @@ object TestInsertUpdate {
     // mappings
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     // update
     val update = UpdateFactory.create(UtilFunctions.readFile("./data/updates/dbpedia01a.ru"))
 
-    val ins = test.getGroundTriplesFromUpdate(update)._2
+    val (ds,is) = RDFUpdateResolver.getGroundTriplesFromUpdate(update)
 
-    test.update = ins(0)
+    test.update = is(0)
 
-    val res = test.resolveForLanguage(testDataRootDir, Language.English)
+    //val res = test.resolveForLanguage(testDataRootDir, Language.English)
 
-    println(res)
-
+    //println(res)
   }
 
 }
@@ -630,7 +616,7 @@ object TestDiffFromInfoboxUpdate {
     // mappings
     val mappingFileSuffix = "_ambig.xml"
 
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     // inserts
     val choiceDML = Seq(new WikiDML("http://en.wikipedia.org/wiki/Santi_Cazorla", "infobox football biography", "name", newValue = "Santi", operation = "INSERT"),
@@ -642,7 +628,7 @@ object TestDiffFromInfoboxUpdate {
 }
 
 // use this for extracting a page
-object TestInfoboxSandboxCustomMappings {
+object TestRDFUpdateResolverMappings {
 
   def main(args: Array[String]): Unit = {
 
@@ -651,7 +637,7 @@ object TestInfoboxSandboxCustomMappings {
 
     // Mappings suffix
     val mappingFileSuffix = "_test.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
     println(test.renderForLanguage(testDataRootDir, Language.English))
 
@@ -666,7 +652,7 @@ object TestNew2 {
 
     // Mappings suffix
     val mappingFileSuffix = "_test.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
 
   }
 
@@ -676,17 +662,13 @@ object TestNew {
 
   def main(args: Array[String]): Unit = {
 
-    val t: Test = new Test()
-
     val ontoFile = new File("ontology.xml");
     val ontologySource = XMLSource.fromFile(ontoFile, Language.Mappings)
 
     val lines = scala.io.Source.fromFile("ontology.xml").mkString
 
     println(lines)
-    println(lines)
     val ontoObj = new OntologyReader().read(ontologySource)
-
   }
 }
 
@@ -698,7 +680,6 @@ object TestNew3 {
 
     // Mappings suffix
     val mappingFileSuffix = "_test.xml"
-    val test = new InfoboxSandboxCustom(testDataRootDir, mappingFileSuffix)
-
+    val test = new RDFUpdateResolver(testDataRootDir, mappingFileSuffix)
   }
 }

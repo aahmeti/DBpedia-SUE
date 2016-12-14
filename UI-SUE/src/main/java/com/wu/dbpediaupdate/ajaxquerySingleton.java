@@ -49,7 +49,7 @@ import at.tuwien.dbai.rewriter.Stopwatch;
 /**
  * Root resource (exposed at "myresource" path)
  */
-//@Path("/ajaxquerySingleton")
+@Path("/ajaxquerySingleton")
 public class ajaxquerySingleton {
 
 	@Context

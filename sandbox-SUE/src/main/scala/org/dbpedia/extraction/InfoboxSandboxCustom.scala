@@ -4,6 +4,7 @@ import java.io._
 import java.nio.charset.StandardCharsets
 import java.util.NoSuchElementException
 import javax.xml.stream.XMLStreamException
+import org.dbpedia.updateresolution.Update
 
 import com.hp.hpl.jena.query._
 import com.hp.hpl.jena.sparql.core.BasicPattern
@@ -537,6 +538,67 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       infoboxCount += (wikiDML.infobox + ":" + wikiDML.property -> 0) // this is what we need to count and return
       if (!infoboxTitles.contains(wikiDML.infobox.toUpperCase))
         infoboxTitles += wikiDML.infobox.toUpperCase
+    }
+
+    // println("Counting Infobox properties...")
+    for (title <- titles) {
+      println(title)
+
+      // get all properties from titles
+      val pathName = download_directory + "/" + title
+      val newPath: Path = Path.fromString(pathName)
+      newPath.createDirectory(failIfExists = false)
+
+      val url = "https://en.wikipedia.org/w/api.php?" +
+        "action=query&prop=revisions&format=xml&rvprop=ids|timestamp|userid|sha1|content&rvlimit=1&rvgeneratexml=&rvcontentformat=text%2Fx-wiki&rvstart=now&rvdir=older&exportnowrap=&titles=" + title // " + revision_limit + "
+
+      val extractLogic = new ExtractLogic
+
+      try {
+
+        if (!new File(download_directory + "/" + title + "/page.xml").exists()) {
+          val (revID, template) = extractLogic.downloadAndCreateTemplate2(pathName, title, url)
+        }
+
+        val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/page.xml"), Language.English).head
+
+        parser(page) match {
+          case Some(node) =>
+
+            val infoboxes = collectTemplates(node)
+            val filteredInfoboxes = infoboxes.filter(x => infoboxTitles.contains(x.title.decoded.toUpperCase)) // filter infoboxes by subject
+
+            for (infobox <- filteredInfoboxes) {
+              for ((k, v) <- infoboxCount) {
+                // enumerate all keysets
+                if (infobox.keySet.contains(k.substring(k.indexOf(":") + 1)))
+                  infoboxCount(k) += 1 // add +1 to keysets
+              }
+            }
+          case None =>
+        }
+      }
+      catch {
+        case _: NoSuchElementException => println("Bad path name: " + pathName)
+        case _: XMLStreamException => println("XML page could not be read:" + pathName)
+        case _: IllegalArgumentException => println("IllegalArgumentException!:" + pathName)
+      }
+    }
+
+    infoboxCount
+
+  }
+
+  def countInfoboxPropertiesfromResolve(titles: Seq[String], infoboxProperties: Set[Update]) = {
+
+    var infoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
+    val infoboxCount = new scala.collection.mutable.HashMap[String, Int]
+
+    // initialize infoboxKeys with 0s
+    for (wikiDML <- infoboxProperties) {
+      infoboxCount += (wikiDML.getPattern().infobox + ":" + wikiDML.getPattern().property -> 0) // this is what we need to count and return
+      if (!infoboxTitles.contains(wikiDML.getPattern().infobox.toUpperCase))
+        infoboxTitles += wikiDML.getPattern().infobox.toUpperCase
     }
 
     // println("Counting Infobox properties...")
@@ -1575,6 +1637,48 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
     }
 
     countInfoboxProperties(subjects, wikiAlternatives.flatten)
+
+  }
+
+  def getStatResultsAlternativesfromResolve(subjectDbpedia: String, predicateDbpedia:String, sampleSize:Int,wikiAlternatives:Set[Update]) =
+  {
+
+    val subjType = getSubjectType(subjectDbpedia)
+    // println(subjType)
+    val rs = getQueryResultsFromDBpedia(subjType.toString)
+
+    val resType = new ArrayBuffer[String]()
+
+    while (rs.hasNext()) {
+
+      val sol = rs.nextSolution.get("?Y").toString
+      // filter only those types from dbpedia ontology
+      if (sol.contains("http://dbpedia.org/ontology")) {
+        resType += sol
+      }
+    }
+
+    val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicateDbpedia, resType.toSeq)
+
+    println(queries)
+    val subjects = new ArrayBuffer[String]()
+
+    for (query <- queries) {
+      //println(query)
+      val rs = getQueryResultsFromDBpedia(query)
+
+      while (rs.hasNext()) {
+
+        val sol = rs.nextSolution.get("?Y").toString
+        // println("Solution: "+sol)
+        val title = sol.substring(sol.lastIndexOf("/") + 1)
+        if (!subjects.contains(title))
+          subjects += title
+        // download the pages
+      }
+    }
+
+    countInfoboxPropertiesfromResolve(subjects, wikiAlternatives)
 
   }
 

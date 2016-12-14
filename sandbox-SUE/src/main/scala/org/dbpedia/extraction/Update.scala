@@ -17,5 +17,8 @@ class Update (
         case UpdateComponent.RdfDelete => pattern.rdfDelete
       }
   }
+  def getPattern(): ResolutionPattern = {
+    pattern
+  }
 }
 

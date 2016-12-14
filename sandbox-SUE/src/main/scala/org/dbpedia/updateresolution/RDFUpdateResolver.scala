@@ -3,6 +3,7 @@ package org.dbpedia.updateresolution
 import java.io._
 import java.util
 import java.nio.charset.StandardCharsets
+import java.util.NoSuchElementException
 import javax.xml.stream.XMLStreamException
 
 import scala.collection.JavaConverters._
@@ -20,7 +21,7 @@ import org.dbpedia.extraction.ontology.io.OntologyReader
 import org.dbpedia.extraction.sources.{WikiPage, XMLSource}
 import org.dbpedia.extraction.util.Language
 import org.dbpedia.extraction.wikiparser._
-import org.dbpedia.extraction.{ExtractLogic, WikiDML}
+import org.dbpedia.extraction.{Update, ExtractLogic, WikiDML}
 
 import scala.collection.mutable.{ArrayBuffer, HashMap, Set, MultiMap}
 import scalax.file.Path
@@ -370,6 +371,85 @@ class RDFUpdateResolver(   var testDataRootDir:File
     }
 
     infoboxCount
+  }
+
+  def countInfoboxPropertiesfromUpdate(titles: Seq[String], infoboxProperties: Set[Update]) = {
+
+    var infoboxTitles = new ArrayBuffer[String] // used for filtering infoboxes based on titles by wikiDML
+    val infoboxCount = new scala.collection.mutable.HashMap[String, Int]
+
+    // initialize infoboxKeys with 0s
+    for (wikiDML <- infoboxProperties) {
+      var prop = ""
+
+/*
+      if (!wikiDML.pattern.wikiDelete.isEmpty) {
+        val prefix = s"InfoboxTemplate($wikiDML.pattern.infoboxType)"
+        prop = wikiDML.pattern.wikiDelete.map(d => s"$prefix.${d.predicate}").mkString(", ")
+
+      }*/
+      if (!wikiDML.pattern.wikiInsert.isEmpty) {
+        val prefix = s"InfoboxTemplate($wikiDML.pattern.infoboxType)"
+
+        for (q<-wikiDML.pattern.wikiInsert){
+          prop=q.predicate
+          println("proprop: "+prop)
+          infoboxCount += (wikiDML.pattern.infoboxType + ":" + prop -> 0) // this is what we need to count and return
+          if (!infoboxTitles.contains(wikiDML.pattern.infoboxType.toUpperCase))
+            infoboxTitles += wikiDML.pattern.infoboxType.toUpperCase
+
+        }
+
+      }
+    }
+
+     println("Counting Infobox properties...")
+    for (title <- titles) {
+      println(title)
+
+      // get all properties from titles
+      val pathName = download_directory + "/" + title
+      val newPath: Path = Path.fromString(pathName)
+      newPath.createDirectory(failIfExists = false)
+
+      val url = "https://en.wikipedia.org/w/api.php?" +
+        "action=query&prop=revisions&format=xml&rvprop=ids|timestamp|userid|sha1|content&rvlimit=1&rvgeneratexml=&rvcontentformat=text%2Fx-wiki&rvstart=now&rvdir=older&exportnowrap=&titles=" + title // " + revision_limit + "
+
+      val extractLogic = new ExtractLogic
+
+      try {
+
+        if (!new File(download_directory + "/" + title + "/page.xml").exists()) {
+          val (revID, template) = extractLogic.downloadAndCreateTemplate2(pathName, title, url)
+        }
+
+        val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/page.xml"), Language.English).head
+
+        parser(page) match {
+          case Some(node) =>
+
+            val infoboxes = collectTemplates(node)
+            val filteredInfoboxes = infoboxes.filter(x => infoboxTitles.contains(x.title.decoded.toUpperCase)) // filter infoboxes by subject
+
+            for (infobox <- filteredInfoboxes) {
+              for ((k, v) <- infoboxCount) {
+                // enumerate all keysets
+                if (infobox.keySet.contains(k.substring(k.indexOf(":") + 1)))
+                  infoboxCount(k) += 1 // add +1 to keysets
+              }
+            }
+          case None =>
+        }
+      }
+      catch {
+        case _: NoSuchElementException => println("Bad path name: " + pathName)
+        case _: XMLStreamException => println("XML page could not be read:" + pathName)
+        case _: IllegalArgumentException => println("IllegalArgumentException!:" + pathName)
+      }
+    }
+
+    infoboxCount
+
   }
 
   // reads and writes statistics using a file with pages
@@ -1171,6 +1251,47 @@ class RDFUpdateResolver(   var testDataRootDir:File
     countInfoboxProperties(subjects, wikiAlternatives.flatten)
   }
 
+  def getStatResultsAlternativesfromUpdate(subjectDbpedia: String, predicateDbpedia:String, sampleSize:Int,wikiAlternatives:java.util.Set[Update]) =
+  {
+
+    val subjType = getSubjectType(subjectDbpedia)
+    // println(subjType)
+    val rs = RDFUpdateResolver.queryDBpedia(subjType.toString)
+
+    val resType = new ArrayBuffer[String]()
+
+    while (rs.hasNext()) {
+
+      val sol = rs.nextSolution.get("?Y").toString
+      // filter only those types from dbpedia ontology
+      if (sol.contains("http://dbpedia.org/ontology")) {
+        resType += sol
+      }
+    }
+
+    val queries = getQueryForResourcesWithSamePredicates(sampleSize, predicateDbpedia, resType.toSeq)
+
+    println("queries"+queries)
+    val subjects = new ArrayBuffer[String]()
+
+    for (query <- queries) {
+      println("query:"+query)
+      val rs = RDFUpdateResolver.queryDBpedia(query)
+
+      while (rs.hasNext()) {
+
+        val sol = rs.nextSolution.get("?Y").toString
+         println("Solution: "+sol)
+        val title = sol.substring(sol.lastIndexOf("/") + 1)
+        if (!subjects.contains(title))
+          subjects += title
+        // download the pages
+      }
+    }
+
+    countInfoboxPropertiesfromUpdate(subjects, wikiAlternatives)
+
+  }
 
   def getSubjectType(subject:String) = {
 
@@ -1195,15 +1316,16 @@ class RDFUpdateResolver(   var testDataRootDir:File
 
 
     var dataset = "SELECT DISTINCT ?Y \n" +
-                  "WHERE { "
+      "WHERE { "
 
-    for (cType <- classType)
-    {
-      dataset +=  "?Y a <" + cType + "> . \n"
+    for (cType <- classType) {
+      dataset += "?Y a <" + cType + "> . \n"
     }
 
-    dataset += "?Y <" + predicate + "> ?Z2 . \n" +
-            "} ORDER BY RAND() LIMIT " + limit
+    if (predicate != "?") {
+    dataset += "?Y <" + predicate + "> ?Z2 . \n"
+  }
+      dataset +=  "} ORDER BY RAND() LIMIT " + limit
 
     res += dataset
 
@@ -1322,7 +1444,7 @@ object RDFUpdateResolver {
       qexec.execSelect
     }
     finally {
-      qexec.close()
+      //qexec.close()
     }
   }
 

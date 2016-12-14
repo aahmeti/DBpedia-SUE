@@ -123,6 +123,7 @@ object UpdatePattern {
     val up = new UpdatePattern()
 
     dmls.foreach(dml => {
+      up.infoboxType = dml.infobox
       val (d,i) = wikiDMLToQuadPair(dml)
       d match {
         case Some(q) => up.wikiDelete.add(q)

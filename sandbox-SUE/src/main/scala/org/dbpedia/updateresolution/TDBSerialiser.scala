@@ -10,7 +10,6 @@ import org.dbpedia.extraction.destinations.Quad
 import org.dbpedia.extraction.destinations.formatters.TerseFormatter
 import org.dbpedia.extraction.ontology.OntologyProperty
 import org.dbpedia.extraction.util.Language
-import org.openrdf.query.Dataset
 
 import scala.collection.mutable.ArrayBuffer
 

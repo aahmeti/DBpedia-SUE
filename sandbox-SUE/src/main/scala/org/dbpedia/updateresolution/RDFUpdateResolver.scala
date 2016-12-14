@@ -449,9 +449,16 @@ class RDFUpdateResolver(   var testDataRootDir:File
     res
   }
 
-  def resolveUpdate(update: UpdateRequest, computeStat:Boolean=false): util.Map[String,java.util.Set[Update]] = {
+  def resolveUpdate(update: UpdateRequest, computeStat:Boolean=false): util.Map[String,util.Set[Update]] = {
+    null
+    //combineFactors( resolveFactorized( update, computeStat ) )
+  }
 
-    val result = new HashMap[String,util.Set[Update]]
+
+  def resolveFactorized(update: UpdateRequest, computeStat:Boolean=false)
+  : util.Map[String,util.Map[Quad,util.Set[Update]]] = {
+
+    val store = new HashMap[String, HashMap[Quad,Set[UpdatePattern]] with MultiMap[Quad,UpdatePattern]]
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Loading a page from a XML file
@@ -502,11 +509,24 @@ class RDFUpdateResolver(   var testDataRootDir:File
         case _: NoSuchElementException => println("Bad path name: " + pathName)
       }
 
-      val parts = UpdatePattern.product(pt.map( {case (k,ups) => ups})).map(x => UpdatePattern.merge(x))
-      result(subj) = parts.map( x => new Update(x, u.instantiation) ).toSet.asJava
+      store(subj) = pt
     }
-    result.asJava
+
+    store.map({case(subj,factors)=>
+      (subj, factors.map({case(quad,ups)=>
+        (quad, new util.HashSet[Update](ups.map(x =>
+          new Update(x,bySubj(subj).instantiation))).asInstanceOf[util.Set[Update]] )}).asJava ) }).asJava
   }
+
+  /*
+  def combineFactors( factors : util.Map[String,util.Map[Quad,util.Set[Update]]] ) : util.Map[String,util.Set[Update]] = {
+    val result = new HashMap[String, util.Set[Update]]
+
+    val parts = UpdatePattern.product(pt.map( {case (k,ups) => ups})).map(x => UpdatePattern.merge(x))
+    result(subj) = parts.map( x => new Update(x, u.instantiation) ).toSet.asJava
+
+  }
+  */
 
 
   def resolveInsert(subject:String, node:PageNode, insAtom : Quad) : Seq[Seq[WikiDML]] = {
@@ -1226,6 +1246,22 @@ class RDFUpdateResolver(   var testDataRootDir:File
     res
 
   }
+
+  def factorUpdateFromUpdateQuery(updateQuery: String) = {
+
+    val update = UpdateFactory.create(updateQuery)
+    val updateMod = update.getOperations.get(0).asInstanceOf[UpdateModify]
+
+    val atomicUpdate =
+      if (updateMod.getWherePattern.toString.contains("?")) {
+        // general update contains one variable at least
+        RDFUpdateResolver.instantiateGeneralUpdate(update)
+      }
+      else { update }
+
+    resolveFactorized(atomicUpdate)
+  }
+
 
   /*
    * Main interface entry point

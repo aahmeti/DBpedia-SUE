@@ -2,9 +2,7 @@ package org.dbpedia.extraction
 
 import java.io._
 import java.nio.charset.StandardCharsets
-import java.util
 import java.util.NoSuchElementException
-import javax.swing._
 import javax.xml.stream.XMLStreamException
 
 import com.hp.hpl.jena.query._
@@ -19,18 +17,10 @@ import org.dbpedia.extraction.ontology.io.OntologyReader
 import org.dbpedia.extraction.sources.{WikiPage, XMLSource}
 import org.dbpedia.extraction.util.Language
 import org.dbpedia.extraction.wikiparser._
-import wikiPropertiesRecommendation.WikiTemplateManager
-
-import scala.collection.JavaConverters._
-import scala.collection.immutable.Stream.Empty
-import scala.io.Source
-
-import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, HashMap, MultiMap, Set}
 import scalax.file.Path
 
 
-//import org.junit.{Ignore, Test}
 import at.tuwien.dbai.rewriter._
 import at.tuwien.dbai.rewriter.incons._
 import org.dbpedia.extraction.ontology.Ontology
@@ -459,8 +449,8 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                     gaps(i) += 1
                 }
               }
-
             }
+          case None =>
         }
       }
       catch {
@@ -524,6 +514,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
 
               }
             }
+          case None =>
         }
       }
       catch {
@@ -583,6 +574,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                   infoboxCount(k) += 1 // add +1 to keysets
               }
             }
+          case None =>
         }
       }
       catch {
@@ -650,6 +642,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
                   newInfoboxCount(k) += 1 // add +1 to keysets
               }
             }
+          case None =>
         }
       }
     }
@@ -783,163 +776,139 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
       // println("Create Logic")
       val extractLogic = new ExtractLogic
 
-      try
-      {
 
-        // println("Extract Logic")
-        val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
+      // println("Extract Logic")
+      val (revID, template) = extractLogic.downloadAndCreateTemplate(pathName, title, url)
 
-        val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
+      val page = XMLSource.fromFile(new File(download_directory + "/" + title + "/" + revID + ".xml"), Language.English).head
 
-        parser(page) match
-        {
-          case Some(n) =>
+      parser(page) match {
+        case Some(n) =>
 
-            for (update <- quads) // for each TP
-            {
+          for (update <- quads) // for each TP
+          {
 
-              val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
+            val subjwikiDML = new ArrayBuffer[Seq[WikiDML]]
 
-              val triple = update.asTriple
-              val tSubject = triple.getSubject.toString
-              val tPredicate = triple.getPredicate.toString
-              val tObject = triple.getObject.toString
+            val triple = update.asTriple
+            val tSubject = triple.getSubject.toString
+            val tPredicate = triple.getPredicate.toString
+            val tObject = triple.getObject.toString
 
-              // println("For each templateMapping")
-              // for (templateMapping <- contextMappings.mappings.templateMappings) {
-              for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
-              )
-              {
-                //println("insider")
-                if (templateMapping._2.isInstanceOf[ConditionalMapping])
-                {
+            // println("For each templateMapping")
+            // for (templateMapping <- contextMappings.mappings.templateMappings) {
+            for (templateMapping <- contextMappings.temp.filter(x => collectTemplateNames(n).contains(x._1.toLowerCase))
+            ) {
+              //println("insider")
+              if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
 
-                  for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size)
-                  {
+                for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
 
-                    val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
+                  val condCase = templateMapping._2.asInstanceOf[ConditionalMapping].cases(i)
 
-                    for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings)
-                    {
+                  for (propertyMapping <- condCase.mapping.asInstanceOf[TemplateMapping].mappings) {
 
-                      if (propertyMapping.isInstanceOf[ConstantMapping])
-                      {
+                    if (propertyMapping.isInstanceOf[ConstantMapping]) {
 
-                        if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == tPredicate)
-                          && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject))
-                        {
+                      if ((propertyMapping.asInstanceOf[ConstantMapping].ontologyProperty.uri == tPredicate)
+                        && (propertyMapping.asInstanceOf[ConstantMapping].value == tObject)) {
 
-                          for {template <- collectTemplates(n)
-                               resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                          }
-                          {
-                            if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                            {
+                        for {template <- collectTemplates(n)
+                             resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                        } {
+                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase) {
 
-                              // TODO: other conditions here
-                              val condDML = new ArrayBuffer[WikiDML]
-                              if (condCase.operator == "isSet")
-                              {
+                            // TODO: other conditions here
+                            val condDML = new ArrayBuffer[WikiDML]
+                            if (condCase.operator == "isSet") {
 
-                                condDML += new WikiDML(n.title.decoded, resolvedTitle, condCase.templateProperty, newValue = placeholder, operation = "INSERT")
+                              condDML += new WikiDML(n.title.decoded, resolvedTitle, condCase.templateProperty, newValue = placeholder, operation = "INSERT")
 
-                                for (j <- 0 until i)
-                                {
+                              for (j <- 0 until i) {
 
-                                  val condDisabled = templateMapping._2.asInstanceOf[ConditionalMapping].cases(j)
+                                val condDisabled = templateMapping._2.asInstanceOf[ConditionalMapping].cases(j)
 
-                                  condDML += new WikiDML(n.title.decoded, resolvedTitle, condDisabled.templateProperty, operation = "DELETE")
-
-                                }
+                                condDML += new WikiDML(n.title.decoded, resolvedTitle, condDisabled.templateProperty, operation = "DELETE")
 
                               }
 
-                              subjwikiDML += condDML.toList
-
                             }
+
+                            subjwikiDML += condDML.toList
 
                           }
 
                         }
-                      }
-                      // end of "if" constant mapping
-
-                    }
-                    // end of "for" all mappings in conditional case
-                  }
-                  // end of "for" all cases in conditional mappings
-                }
-                // end of "if" mapping is conditional mapping
-
-                if (templateMapping._2.isInstanceOf[TemplateMapping])
-                {
-
-                  for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings)
-                  {
-
-                    if (mapping.isInstanceOf[SimplePropertyMapping])
-                    {
-
-                      // TODO: ConstantMapping?
-                      val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
-                      val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
-
-                      if (ontologyProperty.uri == tPredicate)
-                      {
-
-                        for {
-                          template <- collectTemplates(n)
-                          resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                        }
-                        {
-                          //println(templateMapping._1 + " == " + resolvedTitle)
-                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                            subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
-                        }
 
                       }
                     }
+                    // end of "if" constant mapping
+
                   }
+                  // end of "for" all mappings in conditional case
                 }
+                // end of "for" all cases in conditional mappings
+              }
+              // end of "if" mapping is conditional mapping
 
-                if (templateMapping._2.isInstanceOf[ConditionalMapping])
-                {
-                  for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings)
-                  {
+              if (templateMapping._2.isInstanceOf[TemplateMapping]) {
 
-                    if (mapping.isInstanceOf[SimplePropertyMapping])
-                    {
+                for (mapping <- templateMapping._2.asInstanceOf[TemplateMapping].mappings) {
 
-                      val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
-                      val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
+                  if (mapping.isInstanceOf[SimplePropertyMapping]) {
 
-                      // println(templateProperty + " --> " + ontologyProperty)
+                    // TODO: ConstantMapping?
+                    val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
+                    val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
 
-                      if (ontologyProperty.uri == tPredicate)
-                      {
+                    if (ontologyProperty.uri == tPredicate) {
 
-                        //               println(collectTemplates(n).size)
-                        for {template <- collectTemplates(n)
-                             resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
-                        }
-                        {
-                          //println(templateMapping._1 + " == " + resolvedTitle)
-                          if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
-                            subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
-                        }
-
+                      for {
+                        template <- collectTemplates(n)
+                        resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                      } {
+                        //println(templateMapping._1 + " == " + resolvedTitle)
+                        if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                          subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
                       }
+
                     }
                   }
                 }
               }
 
-              insertsForSubject+=new Tuple2("[INSERT] "+update.getPredicate.toString()+" "+update.getObject.toString(),subjwikiDML)
+              if (templateMapping._2.isInstanceOf[ConditionalMapping]) {
+                for (mapping <- templateMapping._2.asInstanceOf[ConditionalMapping].defaultMappings) {
 
+                  if (mapping.isInstanceOf[SimplePropertyMapping]) {
+
+                    val templateProperty = mapping.asInstanceOf[SimplePropertyMapping].templateProperty
+                    val ontologyProperty = mapping.asInstanceOf[SimplePropertyMapping].ontologyProperty
+
+                    // println(templateProperty + " --> " + ontologyProperty)
+
+                    if (ontologyProperty.uri == tPredicate) {
+
+                      //               println(collectTemplates(n).size)
+                      for {template <- collectTemplates(n)
+                           resolvedTitle = context.redirects.resolve(template.title).decoded.toLowerCase
+                      } {
+                        //println(templateMapping._1 + " == " + resolvedTitle)
+                        if (templateMapping._1.toUpperCase == resolvedTitle.toUpperCase)
+                          subjwikiDML += Seq(new WikiDML(n.title.decoded, resolvedTitle, templateProperty, newValue = tObject, operation = "INSERT"))
+                      }
+
+                    }
+                  }
+                }
+              }
             }
 
-          case None => Seq.empty
-        }
+            insertsForSubject += new Tuple2("[INSERT] " + update.getPredicate.toString() + " " + update.getObject.toString(), subjwikiDML)
+
+          }
+
+        case None => Seq.empty
       }
 
       //  wikiDML += subjwikiDML
@@ -1558,6 +1527,7 @@ class InfoboxSandboxCustom(var testDataRootDir:File, var mappingFileSuffix:Strin
             //                for (i <- 0 until templateMapping._2.asInstanceOf[ConditionalMapping].cases.size) {
 
           }
+        case None =>
       }
     }
     catch {

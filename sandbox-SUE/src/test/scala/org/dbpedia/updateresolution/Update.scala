@@ -36,7 +36,7 @@ class UpdateSpec extends FlatSpec with Matchers {
 
     val r = new RDFUpdateResolver(null,".xml")
 
-    val result = r.updateFromUpdateQuery(command)
+    val result = r.factorUpdateFromUpdateQuery(command)
 
     println (s"Total ${result.size()} update atoms translated " )
     for( k <- result.keySet() ){

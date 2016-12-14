@@ -7,6 +7,7 @@ import org.dbpedia.extraction.util.Language
 import org.scalatest._
 import scala.collection.mutable.ArrayBuffer
 
+@Ignore
 class TDBSerializerSpec extends FlatSpec with Matchers {
 
 

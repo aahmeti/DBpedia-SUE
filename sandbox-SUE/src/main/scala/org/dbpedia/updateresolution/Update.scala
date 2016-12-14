@@ -13,8 +13,6 @@ case class Update ( pattern: UpdatePattern,
   def replace(v:String):String = instantiation(v)
 
   def isEmpty : Boolean = false
-
-  def toString( component: String ) = component + " (toString) "
 }
 
 object Update {

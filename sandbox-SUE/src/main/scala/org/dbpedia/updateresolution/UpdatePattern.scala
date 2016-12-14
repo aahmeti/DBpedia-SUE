@@ -41,15 +41,15 @@ case class UpdatePattern (
                 else "INSERT " + wikiInsert.map(d =>
                     s"$prefix.${d.predicate} = ${f(d.value)}").mkString(", ")
 
-    s"ON wikiPage = ${f("?PAGE")} $delOp $insOp"
+    s"ON wikiPage = ${f(UpdatePattern.PAGE)} $delOp $insOp"
   }
 
   def exportString(f: String => String): String = {
     val S = "$$"
     val d = wikiDelete.map(d =>
-      s"${f("?PAGE")}${S}${infoboxType}${S}${d.predicate}$S ${S}DELETE${S}")
+      s"${f(UpdatePattern.PAGE)}${S}${infoboxType}${S}${d.predicate}$S ${S}DELETE${S}")
     val i = wikiInsert.map(d =>
-      s"${f("?PAGE")}${S}${infoboxType}${S}${d.predicate}$S ${S}UPDATE${S}")
+      s"${f(UpdatePattern.PAGE)}${S}${infoboxType}${S}${d.predicate}$S ${S}UPDATE${S}")
 
     d.mkString("\n") + "\n" + i.mkString("\n")
   }
@@ -59,7 +59,7 @@ case class UpdatePattern (
 object UpdatePattern {
   val LANGUAGE = "en"
   val STRING = "xsd:string"
-  val PAGE = "?PAGE"
+  val PAGE = "?page"
 
   var lastVarName = "?@" // init with a char preceding A
 

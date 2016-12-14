@@ -518,7 +518,7 @@ class RDFUpdateResolver(   var testDataRootDir:File
     val pred = insAtom.predicate
     val value = insAtom.value
 
-    for ((templTitle, m) <- contextMappings.templateMappings.filterKeys(relevantNames)) {
+    for ((templTitle, m) <- contextMappings.templateMappings.filterKeys(x=>relevantNames.contains(x.toLowerCase))) {
       m match {
         case condm: ConditionalMapping => {
 

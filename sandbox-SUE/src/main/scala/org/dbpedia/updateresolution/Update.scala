@@ -4,9 +4,8 @@ import com.hp.hpl.jena.sparql.core
 import scala.collection.mutable
 
 case class Update ( pattern: UpdatePattern,
-               instantiation: Map[String, String] )
+                    instantiation: Map[String, String] )
 {
-
   override def toString() = pattern.toString(replace)
 
   def exportString():String = pattern.exportString(replace)
@@ -33,7 +32,8 @@ object Update {
       val inv = const
         .zipWithIndex // (a,0),(b,1),(c,2),...
         .map { case (c, _) => (c, UpdatePattern.freshVar) }
-        .toMap
+        .toMap ++ Map((subj,"?page"))
+
 
       val up = UpdatePattern(subj)
       deletions.foreach(q => up.rdfDelete+= UpdatePattern.rd(q.getPredicate.toString,inv(q.getObject.toString)))

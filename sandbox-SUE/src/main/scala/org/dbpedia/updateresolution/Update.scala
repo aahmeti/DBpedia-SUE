@@ -8,6 +8,8 @@ case class Update ( pattern: UpdatePattern,
 {
   override def toString() = pattern.toString(replace)
 
+  def toString( component:String ) : String = {pattern.toString(replace, component)}
+
   def exportString():String = pattern.exportString(replace)
 
   def replace(v:String):String = instantiation(v)

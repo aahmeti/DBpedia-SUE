@@ -32,16 +32,44 @@ case class UpdatePattern (
     }.foreach( x => to.add(x) )
   }
 
-  def toString( f: String => String ): String = {
-    val prefix = s"InfoboxTemplate($infoboxType)"
+  def toString( f: String => String = {x=>x}
+                ,  component:String = s"${UpdatePattern.WIKI_DELETE} ${UpdatePattern.WIKI_INSERT}" ): String = {
 
-    val delOp = if (wikiDelete.isEmpty) ""
-                else s"DELETE " + wikiDelete.map(d =>s"$prefix.${d.predicate}").mkString(", ")
-    val insOp = if (wikiInsert.isEmpty) ""
-                else "INSERT " + wikiInsert.map(d =>
-                    s"$prefix.${d.predicate} = ${f(d.value)}").mkString(", ")
+    val delOp =  if( component.contains(UpdatePattern.WIKI_DELETE) ) {
+                    val prefix = if(infoboxType!=null) s"InfoboxTemplate($infoboxType)" else ""
+                    if (wikiDelete.isEmpty) ""
+                    else s"DELETE " + wikiDelete.map(d => s"$prefix.${d.predicate}").mkString(", ")
+                  }
+                  else ""
 
-    s"ON wikiPage = ${f(UpdatePattern.PAGE)} $delOp $insOp"
+    val insOp =  if( component.contains(UpdatePattern.WIKI_INSERT) ) {
+                    val prefix = if(infoboxType!=null) s"InfoboxTemplate($infoboxType)" else ""
+                    if (wikiInsert.isEmpty) ""
+                    else s"INSERT " + wikiInsert.map(d => s"$prefix.${d.predicate} = ${f(d.value)}").mkString(", ")
+                  }
+                  else ""
+
+    val wikiPart = if( !(delOp+insOp).isEmpty ) s"ON wikiPage = ${f(UpdatePattern.PAGE)} $delOp $insOp" else ""
+
+    val rdfDelOp =  if( component.contains(UpdatePattern.RDF_DELETE) ) {
+                      val prefix = ""
+                      if (rdfDelete.isEmpty) ""
+                      else s"DELETE " + wikiDelete.map(d => s"$prefix.${d.predicate}").mkString(", ")
+                    }
+                    else ""
+
+    val rdfInsOp =  if( component.contains(UpdatePattern.RDF_INSERT) ) {
+                      val prefix = ""
+                      if (rdfInsert.isEmpty) ""
+                      else s"INSERT " + wikiInsert.map(d => s"$prefix.${d.predicate} = ${f(d.value)}").mkString(", ")
+                    }
+                    else ""
+
+    val rdfPart = if( !(rdfDelOp+rdfInsOp).isEmpty ) s"$delOp $insOp" else ""
+
+    s"$wikiPart $rdfPart"
+
+
   }
 
   def exportString(f: String => String): String = {

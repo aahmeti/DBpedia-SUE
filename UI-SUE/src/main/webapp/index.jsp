@@ -60,6 +60,7 @@ $(document).ready(function(){
 														 },
 														success : function(
 																response) { // on success..
+																
 														 	$("#dialog").dialog('close');
 															$("#results").show(1000);
 														$('#infobox_text').html($($.parseHTML(response)).filter("#jsoninfoboxes"));
@@ -79,8 +80,12 @@ $(document).ready(function(){
 													      $( "#progressbar" ).progressbar( "value", false );
 													      $( ".progress-label" )
 													        .text( "Starting update..." );
-													        
-															$( "#tabsverticalTriples" ).append($($.parseHTML(response)).filter("#js2"));
+													        $('#js2').html(""); //test
+															//$( "#tabsverticalTriples" ).append($($.parseHTML(response)).filter("#js2"));
+															
+															$( "#tabJS" ).html("");
+															$( "#tabJS" ).append($($.parseHTML(response)).filter("#js2"));
+															
 															$('#js2').each(function (index, element) { eval(element.innerHTML); });
 															
 															addButtonConsistency();
@@ -369,6 +374,7 @@ WHERE{}
 							</div> <!-- tabsvertical -->
 						</div>
 						</div>
+						<div id="tabJS"></div> 
 
 					</td>
 					<td valign="top" style="width: 97%;">

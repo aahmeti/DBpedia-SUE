@@ -2,13 +2,11 @@ package com.wu.dbpediaupdate;
 
 import at.tuwien.dbai.rewriter.Stopwatch;
 
-import org.dbpedia.extraction.WikiDML;
 import org.dbpedia.extraction.destinations.Quad;
 import org.dbpedia.updateresolution.RDFUpdateResolver;
 import org.dbpedia.updateresolution.Update;
 import org.json.JSONException;
 import org.json.JSONObject;
-import scala.collection.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,16 +42,11 @@ public class ajaxupdateSingletonRecode {
 	private static final Boolean DEBUG = false;
 
 	/**
-	 * @param query
-	 *            The SPARQL query
-	 * @param stats
-	 *            FORM value indicating if the stats should be shown
-	 * @param sample
-	 *            The number of sample subject to compute the stats
-	 * @param req
-	 *            Common HTTP req
-	 * @param servletResponse
-	 *            Common response
+	 * @param query The SPARQL query
+	 * @param stats FORM value indicating if the stats should be shown
+	 * @param sample The number of sample subject to compute the stats
+	 * @param req Common HTTP req
+	 * @param servletResponse Common response
 	 * @return a String with the HTML code of the ajax
 	 * @throws IOException
 	 */
@@ -72,7 +65,7 @@ public class ajaxupdateSingletonRecode {
 		String title_wiki = ""; // title of wikipedia page (e.g.Cristiano_Ronaldo)
 		String jscript = "";
 		int numTabsVertical = 1;
-		String insertPropertyDbpedia = null;
+		//String insertPropertyDbpedia = null;
 		ArrayList<String> titles = new ArrayList<String>();
 		int numSubject = 0; // counts the number of subjects
 		int numAlternative = 0; // counts the number of alternatives

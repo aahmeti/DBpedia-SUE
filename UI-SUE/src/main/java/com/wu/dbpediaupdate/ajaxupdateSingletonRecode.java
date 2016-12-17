@@ -330,12 +330,10 @@ public class ajaxupdateSingletonRecode {
 
 			for (int p = 1; p <= numTabsVertical; p++) {
 				jscript += "$(\"#tabsvertical-" + p + "\" ).tabs();\n";
-				jscript += "$(\"#tabsvertical-" + p + "\" ).tabs(\"destroy\");\n";
-				jscript += "$(\"#tabsvertical-" + p + "\" ).tabs();\n";
 
 				// add show/hide functionality
 				//jscript += "document.getElementById(\"showtp-" + p + "\").addEventListener(\"click\", function() {\n";
-				jscript += "$(\"#showtp-" + p + "\").on(\"click\", function() {\n";
+				jscript += "$(\"#showtp-" + p + "\").on(\"click\", function() {\n"; //this fix problem with multiple queries
 				jscript += "$('#showtp-" + p + "').css( 'font-weight', '700' );";
 				for (int k = 1; k <= numTabsVertical; k++) {
 					if (k != p) {

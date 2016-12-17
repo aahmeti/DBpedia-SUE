@@ -260,8 +260,8 @@ public class ajaxupdateSingleton {
 							seqsampling.add(seqalternatives);
 							*/
 							//FIXME splipt by adds and deletes
-							String addsWikipedia = seq.toString(); 
-							String delsWikipedia = seq.toString();
+							String addsWikipedia = seq.toString("WikiInsert"); 
+							String delsWikipedia = seq.toString("WikiDelete");
 							
 							//FIXME change the following to allow for insert and delete properties
 							// System.out.println("iterate it2");

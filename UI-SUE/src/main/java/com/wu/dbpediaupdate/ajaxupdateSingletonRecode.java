@@ -40,7 +40,7 @@ public class ajaxupdateSingletonRecode {
 	 */
 	private static final Integer MAX_SAMPLING = 300;
 	private static final Integer DEFAULT_SAMPLING = 100;
-	
+
 	private static final Boolean DEBUG = false;
 
 	/**
@@ -65,17 +65,17 @@ public class ajaxupdateSingletonRecode {
 
 		Stopwatch watch = new Stopwatch(); // Count time
 		watch.start();
-		
+
 		String ret = ""; // Returned String
 		String divjsoninfoboxes = "";
-		String originalWikiInfobox = ""; //store the original Wikipedia infobox
+		String originalWikiInfobox = ""; // store the original Wikipedia infobox
 		String title_wiki = ""; // title of wikipedia page (e.g.Cristiano_Ronaldo)
 		String jscript = "";
 		int numTabsVertical = 1;
 		String insertPropertyDbpedia = null;
 		ArrayList<String> titles = new ArrayList<String>();
-		int numSubject = 0; //counts the number of subjects
-		int numAlternative = 0; //counts the number of alternatives
+		int numSubject = 0; // counts the number of subjects
+		int numAlternative = 0; // counts the number of alternatives
 
 		// Check "WHERE" clause, and include it if it is not present
 		if (!query.contains("WHERE")) {
@@ -105,7 +105,7 @@ public class ajaxupdateSingletonRecode {
 			for (String subject : update.keySet()) {
 				ret += "<div id=\"subjectstab-" + (numSubject + 1) + "\">"; // each subject is inside a div subjectstab-1, 2, 3...
 
-				title_wiki = subject; //get title of wikipedia page (e.g.Cristiano_Ronaldo)
+				title_wiki = subject; // get title of wikipedia page (e.g.Cristiano_Ronaldo)
 				// Get rid of the prefix URI if necessary:
 				int bar = title_wiki.lastIndexOf('/');
 				if (bar != -1) {
@@ -114,68 +114,73 @@ public class ajaxupdateSingletonRecode {
 				titles.add(title_wiki); // add current title to the set of all titles involved in the update
 				if (DEBUG)
 					System.out.println("title_wiki:" + title_wiki);
-				
+
 				// Get map: Original Triple->Set of Alternative Updates (each update can have several affected properties)
 				Map<Quad, Set<Update>> wikidmls = update.get(subject);
 
 				if (wikidmls != null) {
 
-					originalWikiInfobox = getOriginalInfobox(title_wiki); //Get the original Infobox of the subject
-					
+					originalWikiInfobox = getOriginalInfobox(title_wiki); // Get the original Infobox of the subject
+
 					// Now we iterate on each original triple of the update
 					Iterator<Entry<Quad, Set<Update>>> tps = wikidmls.entrySet().iterator();
-					ret += "<div id=\"tpsSubject\">"; //each triple is inside a div tpsSubject
+					ret += "<div id=\"tpsSubject\">"; // each triple is inside a div tpsSubject
 					String retTemp = "";
 					boolean firstTP = true;
 					while (tps.hasNext()) {
 						Entry<Quad, Set<Update>> tpWithOriginalText = tps.next();
 						Quad qd = tpWithOriginalText.getKey();
-						String originalUpdate = qd.subject() + " " + qd.predicate() + " " + qd.value(); //get the original triple pattern update
+						String originalUpdate = qd.subject() + " " + qd.predicate() + " " + qd.value(); // get the original triple pattern update
 						Set<Update> tp = tpWithOriginalText.getValue();
 
-						//insert the header where we will list all original triple patterns
+						// insert the header where we will list all original triple patterns
 						ret += "<a id=\"showtp-" + numTabsVertical + "\" style=\"cursor:pointer;";
 						if (firstTP)
-							ret += "font-weight:700"; //the first one is highlighted
+							ret += "font-weight:700"; // the first one is highlighted
 						ret += "\"> <img src=\"img/click.jpg\" width=5% style=\"vertical-align: middle;\">" + escapeHtml(originalUpdate)
 								+ "</a><br/>";
 						if (!firstTP)
 							ret += "<br/>";
-						
-						retTemp += "<div id=\"tpHide-" + numTabsVertical + "\""; //each TP is inside a numbered tpHide div
+
+						retTemp += "<div id=\"tpHide-" + numTabsVertical + "\""; // each TP is inside a numbered tpHide div
 						if (firstTP)
 							firstTP = false;
 						else
-							retTemp += " style=\"display:none\""; //hide all TPs except for the first one
+							retTemp += " style=\"display:none\""; // hide all TPs except for the first one
 						retTemp += ">";
 
-						retTemp += "<div id=\"alternativesDML\">"; //inside each tpHide, we build a alternativesDML and tabsvertical div 
+						retTemp += "<div id=\"alternativesDML\">"; // inside each tpHide, we build a alternativesDML and tabsvertical div
 						retTemp += "<div id=\"tabsvertical-"
 						// + (w + 1)
 								+ numTabsVertical + "\" class=\"ui-tabs-verticalsmall ui-helper-clearfix\">";
 
 						numTabsVertical++;
-						
-						String tempRetOptions = "<div id=\"tabsOptionsContent\">"; //these are the options (alternative updates)
+
+						String tempRetOptions = "<div id=\"tabsOptionsContent\">"; // these are the options (alternative updates)
 						int initialIndex = numAlternative;
 						int numoption = 0;
 
 						java.util.Iterator<Update> it = tp.iterator();
 						while (it.hasNext()) { // iterate on all the alternative updates
 							numoption++;
-							ArrayList<String> tempInsertProperties = new ArrayList<String>(); // list of inserted properties, used to provide visualization in the original infobox
-							ArrayList<String> tempInsertValues = new ArrayList<String>(); // list of inserted values, used to provide visualization in the original infobox
-							ArrayList<String> tempDelProperties = new ArrayList<String>(); // list of deleted properties, used to provide visualization in the original infobox
-							ArrayList<String> tempDelValues = new ArrayList<String>(); // list of deleted values, used to provide visualization in the original infobox
+							ArrayList<String> tempInsertProperties = new ArrayList<String>(); // list of inserted properties, used to provide
+																								// visualization in the original infobox
+							ArrayList<String> tempInsertValues = new ArrayList<String>(); // list of inserted values, used to provide visualization in
+																							// the original infobox
+							ArrayList<String> tempDelProperties = new ArrayList<String>(); // list of deleted properties, used to provide
+																							// visualization in the original infobox
+							ArrayList<String> tempDelValues = new ArrayList<String>(); // list of deleted values, used to provide visualization in the
+																						// original infobox
 
 							Update seq = it.next();
-						
+
 							// Split by adds and deletes
 							String addsWikipedia = seq.toString("WikiInsert");
 							String delsWikipedia = seq.toString("WikiDelete");
 
-							// FIXME I have to parse the adds and deleted and update the tempInsertProperties, tempInsertValues, tempDelProperties and tempDelValues
-							//change the following to allow for insert
+							// FIXME I have to parse the adds and deleted and update the tempInsertProperties, tempInsertValues, tempDelProperties and
+							// tempDelValues
+							// change the following to allow for insert
 							// and delete properties
 							String exportDMLs = "";
 							/*
@@ -195,9 +200,9 @@ public class ajaxupdateSingletonRecode {
 							// print the div including the content of the alternative
 							tempRetOptions += "<div id=\"tabs-" + (numAlternative + 1) + "\">";
 							tempRetOptions += wikiResult(); // header of the Wikipedia results
-							tempRetOptions += startTable(); 
-							tempRetOptions += printRow(addsWikipedia, "green"); //print adds
-							tempRetOptions += printRow(delsWikipedia, "red"); //print deletes
+							tempRetOptions += startTable();
+							tempRetOptions += printRow(addsWikipedia, "green"); // print adds
+							tempRetOptions += printRow(delsWikipedia, "red"); // print deletes
 							tempRetOptions += closeTable();
 
 							String addsDbpedia = "";
@@ -222,10 +227,10 @@ public class ajaxupdateSingletonRecode {
 
 							tempRetOptions += DBpediaResult(); // header of the Dbpedia results
 							tempRetOptions += startTable();
-							tempRetOptions += printRow(addsDbpedia, "green"); //print adds
-							tempRetOptions += printRow(delsDbpedia, "red"); //print deletes
+							tempRetOptions += printRow(addsDbpedia, "green"); // print adds
+							tempRetOptions += printRow(delsDbpedia, "red"); // print deletes
 							tempRetOptions += closeTable();
-							
+
 							// print footer in which we ask for feedback
 							tempRetOptions += "<div style=\"padding-top:10px;width:100%; text-align: left\"><a id=\"mailFeedback\" href=\"mailto:dbpediaupdate@ai.wu.ac.at?subject=feedback on query&body=Hi, please check the query:\n\n"
 									+ escapeHtml(query)
@@ -236,14 +241,14 @@ public class ajaxupdateSingletonRecode {
 									+ (numAlternative + 1)
 									+ "\" style=\"text-align:right\"> Mark to check consistency <input type=\"checkbox\" name=\"wikidml\" value=\"wikiDMLs-"
 									+ (numAlternative + 1) + "\"";
-							
+
 							if (numoption == 1) {
 								tempRetOptions += " checked"; // activate the first one by default
 							}
 
 							// we keep and export of the alternatives ina hidden div, which will be send with the request of checking the consistency
-							tempRetOptions += "><div style=\"display:none\" id=\"wikiDMLs-" + (numAlternative + 1) + "\">" + exportDMLs + "</div></div>";
-							
+							tempRetOptions += "><div style=\"display:none\" id=\"wikiDMLs-" + (numAlternative + 1) + "\">" + exportDMLs
+									+ "</div></div>";
 
 							tempRetOptions += "</div>"; // close tabs-"+i
 
@@ -252,11 +257,11 @@ public class ajaxupdateSingletonRecode {
 							 */
 							String currentWikiPage = applyChangesInfobox(originalWikiInfobox, tempInsertProperties, tempInsertValues,
 									tempDelProperties, tempDelValues);
-							
-							if (DEBUG)
-									System.out.println("currentWikiPage after:" + currentWikiPage);
 
-							//divjsoninfoboxes stores the jsoninfobox div with the currentWikipedia Pages
+							if (DEBUG)
+								System.out.println("currentWikiPage after:" + currentWikiPage);
+
+							// divjsoninfoboxes stores the jsoninfobox div with the currentWikipedia Pages
 							if (numAlternative == 0) {
 								divjsoninfoboxes += "<div id=\"jsoninfobox-" + (numAlternative + 1) + "\">";
 							} else {
@@ -274,7 +279,8 @@ public class ajaxupdateSingletonRecode {
 						/*
 						 * COMPUTE STATISTICS IF IT IS REQUIRED
 						 */
-						// FIXME In the next IF, it should also be: insertPropertyDbpedia!= null but I removed it until we have the Dbpedia output integrated in the patterns
+						// FIXME In the next IF, it should also be: insertPropertyDbpedia!= null but I removed it until we have the Dbpedia output
+						// integrated in the patterns
 						if (stats != null && stats.equalsIgnoreCase("true")) {
 							retTemp += getStatistics(sample, title_wiki, resolver, tp);
 						}
@@ -305,12 +311,13 @@ public class ajaxupdateSingletonRecode {
 				ret += "</div>"; // close subjectstab
 
 				numSubject += 1;
-			} // END OF ITERATION TRIPLES
+			} // END OF ITERATION OF TRIPLES
 
-			
+			// Print final div of check consistency
 			ret += "<div style=\"text-align:right\"><button id=\"checkconsistency\">Check consitency of selected results</button><div id=\"resultConsistency\" style=\"margin-top:10px\"></div></div>";
 
 			ret += "</div>"; // close alternativesTriples
+
 			/*
 			 * Write the name of the tabs
 			 */
@@ -326,12 +333,8 @@ public class ajaxupdateSingletonRecode {
 			 */
 			ret += "<div id=\"jsoninfoboxes\">" + divjsoninfoboxes + "</div>";
 
-			ret += "<div id=\"js2\" style=\"display:none;\" >"
-			// + "<script id=\"js\">\n"
-					+ "$(document).ready(function() {\n";
-			// ret+="alert(\"test\");\n";
+			ret += "<div id=\"js2\" style=\"display:none;\" >" + "$(document).ready(function() {\n";
 
-			// for (int p = 1; p <= w; p++) {
 			for (int p = 1; p <= numTabsVertical; p++) {
 				jscript += "$(\"#tabsvertical-" + p + "\" ).tabs();\n";
 				System.out.println("\n*****************Doing tabs: " + p + "\n");
@@ -363,9 +366,6 @@ public class ajaxupdateSingletonRecode {
 						jscript += "$(\"#jsoninfobox-" + k + "\").hide()\n";
 				}
 				jscript += "$(\"#jsoninfobox-" + n + "\").show()\n" + "});\n";
-				/*
-				 * jscript+="$('#infobox_text').html('tabs-"+(i+1)+"');\n" + "});\n";
-				 */
 
 				// for the visibility of the stats
 				// jscript+="$( \"#showstats\" ).click(function() {\n"+
@@ -374,12 +374,9 @@ public class ajaxupdateSingletonRecode {
 			}
 
 			ret += jscript;
-			ret += "});\n"
-			// ret+="</script>comon"
-					+ "</div>";
+			ret += "});\n" + "</div>";
 
-			// return title of wikipage (to get the wikipedia infobox in
-			// javascript
+			// return title of wikipage (to get the wikipedia infobox in javascript
 			ret += "<div id=\"title_wiki\">" + title_wiki + "</div>";
 			System.out.println("ret:" + ret);
 
@@ -389,6 +386,7 @@ public class ajaxupdateSingletonRecode {
 		}
 
 		watch.stop();
+
 		System.out.println("Time:" + watch.getTime());
 
 		return ret;
@@ -403,11 +401,11 @@ public class ajaxupdateSingletonRecode {
 	 * @return
 	 */
 	private String getStatistics(String sample, String title_wiki, RDFUpdateResolver resolver, Set<Update> tp) {
-		String retTemp="";
+		String retTemp = "";
 		String insertPropertyDbpedia;
 		// && insertPropertyDbpedia != null) {
 
-		// prepare statistics 
+		// prepare statistics
 		int sampling = DEFAULT_SAMPLING;
 		if (sample != null) {
 			try {
@@ -423,11 +421,11 @@ public class ajaxupdateSingletonRecode {
 		// FIXME I need the insertPropertyDbpedia SO far I use insertPropertyDbpedia= ? meaning everything
 		// until we have the Dbpedia output integrated in the patterns
 		insertPropertyDbpedia = "?";
-		statOutput = resolver.getStatResultsAlternativesfromUpdate("<http://dbpedia.org/resource/" + title_wiki + ">",
-				insertPropertyDbpedia, sampling, tp);
+		statOutput = resolver.getStatResultsAlternativesfromUpdate("<http://dbpedia.org/resource/" + title_wiki + ">", insertPropertyDbpedia,
+				sampling, tp);
 
 		retTemp += "<div style=\"margin-bottom:10px\">";
-		
+
 		if (statOutput.size() > 0) {
 			scala.collection.Iterator<String> itprops = statOutput.keysIterator();
 
@@ -436,8 +434,7 @@ public class ajaxupdateSingletonRecode {
 
 			while (itprops.hasNext()) {
 				String props = itprops.next();
-				Integer value = Integer.parseInt(statOutput.get(props).toString().replace("(", "").replace(")", "")
-						.replace("Some", ""));
+				Integer value = Integer.parseInt(statOutput.get(props).toString().replace("(", "").replace(")", "").replace("Some", ""));
 				// erase the infobox info
 				props = props.substring(props.indexOf(':') + 1);
 				int length = 0;
@@ -448,24 +445,29 @@ public class ajaxupdateSingletonRecode {
 					per = percentage + " %";
 				}
 
-				retTemp += "<tr><td>" + props + ":</td><td><table><tr><td bgcolor=\"" + getRandomColor()
-						+ "\" height=\"10px\" width=\"" + length + "px\" title=\"" + per + "\"></td></tr></table></td></tr>";
+				retTemp += "<tr><td>" + props + ":</td><td><table><tr><td bgcolor=\"" + getRandomColor() + "\" height=\"10px\" width=\"" + length
+						+ "px\" title=\"" + per + "\"></td></tr></table></td></tr>";
 			}
 			retTemp += "</table>";
 		}
 
-		// ret+=statOutput.toString();
 		retTemp += "</div>";
 		return retTemp;
 	}
 
 	/**
 	 * Apply changes to the originalInfobox
-	 * @param originalWikiInfobox original text of the infobox
-	 * @param tempInsertProperties //inserted wikipedia properties
-	 * @param tempInsertValues //inserted wikipedia values
-	 * @param tempDelProperties //deleted wikipedia properties
-	 * @param tempDelValues //deleted wikipedia values
+	 * 
+	 * @param originalWikiInfobox
+	 *            original text of the infobox
+	 * @param tempInsertProperties
+	 *            //inserted wikipedia properties
+	 * @param tempInsertValues
+	 *            //inserted wikipedia values
+	 * @param tempDelProperties
+	 *            //deleted wikipedia properties
+	 * @param tempDelValues
+	 *            //deleted wikipedia values
 	 * @return text with the changes applied
 	 */
 	private String applyChangesInfobox(String originalWikiInfobox, ArrayList<String> tempInsertProperties, ArrayList<String> tempInsertValues,
@@ -478,8 +480,6 @@ public class ajaxupdateSingletonRecode {
 		String postInsert = currentWikiPage.substring(currentWikiPage.indexOf("|", posInfobox));
 		String insertlines = "";
 
-		
-
 		for (int j = 0; j < tempInsertProperties.size(); j++) {
 
 			insertlines += "<span style=\"background-color: green;\">" + "| " + tempInsertProperties.get(j) + " = "
@@ -487,9 +487,8 @@ public class ajaxupdateSingletonRecode {
 		}
 		currentWikiPage = preInsert + insertlines + postInsert;
 
-
 		// delete properties
-		//FIXME not sure this is working	
+		// FIXME not sure this is working
 		for (int j = 0; j < tempDelProperties.size(); j++) {
 			String valueNoQuotes = tempDelValues.get(j).replace("\"", "");
 			// System.out.println("searching:"+"\\| "+tempDelProperties.get(j)+
@@ -501,15 +500,19 @@ public class ajaxupdateSingletonRecode {
 			// of
 			// <br/>
 			/*
-			 * currentWikiPage = currentWikiPage.replaceAll("\\| " + tempDelProperties.get(j) + " = " + valueNoQuotes + "<br\\/>",
-			 * ""); // escape
+			 * currentWikiPage = currentWikiPage.replaceAll("\\| " + tempDelProperties.get(j) + " = " + valueNoQuotes + "<br\\/>", ""); // escape
 			 */// / of
 				// <br/>
 			String tooltip = "<span style=\"background-color: red;\" title=\"" + tempDelProperties.get(j) + " = " + valueNoQuotes
 					+ "\">&nbsp;&nbsp;&nbsp;</span><br\\/>";
-			currentWikiPage = currentWikiPage.replaceAll("\\| " + tempDelProperties.get(j) + " += " + valueNoQuotes + "<br\\/>",
-					tooltip); // +=
-								// escape one or more spaces escape / of <br/>
+			currentWikiPage = currentWikiPage.replaceAll("\\| " + tempDelProperties.get(j) + " += " + valueNoQuotes + "<br\\/>", tooltip); // +=
+																																			// escape
+																																			// one or
+																																			// more
+																																			// spaces
+																																			// escape
+																																			// / of
+																																			// <br/>
 
 		}
 		return currentWikiPage;
@@ -517,6 +520,7 @@ public class ajaxupdateSingletonRecode {
 
 	/**
 	 * Get the original Infobox of a wikipedia page
+	 * 
 	 * @param title_wiki
 	 * @return
 	 */
@@ -540,9 +544,9 @@ public class ajaxupdateSingletonRecode {
 				String nameAtt = names[0];
 				page = jsonPage.getJSONObject(nameAtt).getJSONArray("revisions").getJSONObject(0).get("*").toString();
 			}
-			//store the original wikipedia infobox
+			// store the original wikipedia infobox
 			originalWikiInfobox = page.replace("\n", "<br/>");
-			
+
 		} catch (Exception e) {
 			originalWikiInfobox = "<span style=\"background-color: #FFFF00\">Content is temporarily unavailable</span>";
 		}
@@ -656,13 +660,7 @@ public class ajaxupdateSingletonRecode {
 
 	public String getWikiValueFromWikiDML(String line) {
 		int posPar = line.indexOf(").");
-		return line.substring(line.indexOf("= ", posPar) + 2, line.length() - 2); // -2
-																					// to
-																					// get
-																					// rid
-																					// of
-																					// last
-																					// ';'
+		return line.substring(line.indexOf("= ", posPar) + 2, line.length() - 2); // -2 to get rid of last ';'
 	}
 
 	public String getRandomColor() {
@@ -670,8 +668,6 @@ public class ajaxupdateSingletonRecode {
 		float r = rand.nextFloat();
 		float g = rand.nextFloat();
 		float b = rand.nextFloat();
-		// Color randomColor = new Color(r, g, b);
-
 		return "rgb(" + r + "," + g + "," + b + ")";
 	}
 }
